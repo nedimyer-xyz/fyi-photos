@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- ===================== Theme options (Customize panel) ===================== -->
+
+  <!-- Colors -->
+  <meta name="color:Background" content="#f5f4f0">
+  <meta name="color:Text" content="#1b1b1b">
+  <meta name="color:Muted Text" content="#77736b">
+  <meta name="color:Accent" content="#b0552f">
+  <meta name="color:Lightbox Background" content="#0d0d0d">
+
+  <!-- Images -->
+  <meta name="image:Logo" content="">
+
+  <!-- Layout -->
+  <meta name="select:Layout" content="masonry" title="Masonry">
+  <meta name="select:Layout" content="grid" title="Square grid">
+  <meta name="select:Layout" content="single" title="Single column">
+
+  <meta name="select:Columns" content="3" title="3 columns">
+  <meta name="select:Columns" content="2" title="2 columns">
+  <meta name="select:Columns" content="4" title="4 columns">
+
+  <meta name="select:Gutter" content="16" title="Medium gutter">
+  <meta name="select:Gutter" content="4" title="Tight gutter">
+  <meta name="select:Gutter" content="32" title="Wide gutter">
+
+  <meta name="select:Typeface" content="serif" title="Serif headings">
+  <meta name="select:Typeface" content="sans" title="Sans-serif everything">
+
+  <meta name="select:Pagination" content="infinite" title="Infinite scroll">
+  <meta name="select:Pagination" content="button" title="Load more button">
+  <meta name="select:Pagination" content="classic" title="Previous / next links">
+
+  <!-- Toggles -->
+  <meta name="if:Use Lightbox" content="1">
+  <meta name="if:Show Captions On Hover" content="1">
+  <meta name="if:Show Camera Info" content="1">
+  <meta name="if:Hide Non Photo Posts" content="0">
+  <meta name="if:Show Description" content="1">
+  <meta name="if:Protect Images" content="0">
+
+  <!-- Text -->
+  <meta name="text:Instagram Username" content="">
+  <meta name="text:Email Address" content="">
+  <meta name="text:Website URL" content="">
+  <meta name="text:Footer Text" content="">
+
+  <!-- ========================================================================== -->
+
+  <title>{Title}{block:SearchPage} · Search: {SearchQuery}{/block:SearchPage}{block:TagPage} · #{Tag}{/block:TagPage}{block:PostSummary} · {PostSummary}{/block:PostSummary}</title>
+  {block:Description}<meta name="description" content="{MetaDescription}">{/block:Description}
+  <link rel="shortcut icon" href="{Favicon}">
+  <link rel="apple-touch-icon" href="{PortraitURL-128}">
+  <link rel="alternate" type="application/rss+xml" href="{RSS}">
+  {block:PostSummary}<meta property="og:title" content="{PostSummary}">{/block:PostSummary}
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&display=swap">
+
+  <style>
+    :root {
+      --bg: {color:Background};
+      --text: {color:Text};
+      --muted: {color:Muted Text};
+      --accent: {color:Accent};
+      --lightbox-bg: {color:Lightbox Background};
+      --gutter: {select:Gutter}px;
+      --columns: {select:Columns};
+      --max-width: 1600px;
+      --serif: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+      --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      --heading: var(--serif);
+    }
+    .typeface-sans { --heading: var(--sans); }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 400 15px/1.6 var(--sans);
+      -webkit-font-smoothing: antialiased;
+    }
+    img { display: block; max-width: 100%; height: auto; }
+    a { color: inherit; text-decoration: none; }
+    a:hover { color: var(--accent); }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .visually-hidden {
+      position: absolute; width: 1px; height: 1px; overflow: hidden;
+      clip: rect(0 0 0 0); white-space: nowrap;
+    }
+
+    /* ---------- Header ---------- */
+    .site-header {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 48px 24px 40px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 20px 40px;
+    }
+    .brand { min-width: 0; }
+    .brand-title {
+      margin: 0;
+      font: 400 clamp(32px, 5vw, 52px)/1.05 var(--heading);
+      letter-spacing: -0.01em;
+    }
+    .typeface-sans .brand-title { font-weight: 600; letter-spacing: -0.03em; font-size: clamp(26px, 4vw, 40px); }
+    .brand-logo img { max-height: 72px; width: auto; }
+    .brand-description {
+      margin: 10px 0 0;
+      max-width: 52ch;
+      color: var(--muted);
+    }
+    .brand-description p { margin: 0; }
+    .site-nav ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 22px;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .site-nav a { padding: 4px 0; border-bottom: 1px solid transparent; }
+    .site-nav a:hover { border-color: currentColor; }
+
+    /* ---------- Page headings (tag / search) ---------- */
+    .page-heading {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 24px 28px;
+      color: var(--muted);
+    }
+    .page-heading h2 {
+      margin: 0;
+      font: 400 26px/1.2 var(--heading);
+      color: var(--text);
+    }
+    .page-heading p { margin: 4px 0 0; }
+
+    /* ---------- Gallery ---------- */
+    .gallery {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+    .grid { display: grid; gap: var(--gutter); }
+
+    /* Masonry: CSS columns until JS arranges tiles into balanced, in-order columns */
+    .layout-masonry .grid { display: block; columns: var(--columns); column-gap: var(--gutter); }
+    .layout-masonry .grid > .tile { break-inside: avoid; margin-bottom: var(--gutter); }
+    .layout-masonry .grid.is-arranged { display: flex; align-items: flex-start; columns: auto; gap: var(--gutter); }
+    .layout-masonry .grid.is-arranged > .tile { margin-bottom: 0; }
+    .grid-column { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: var(--gutter); }
+
+    .layout-grid .grid { grid-template-columns: repeat(var(--columns), minmax(0, 1fr)); }
+    .layout-grid .tile-media { aspect-ratio: 1 / 1; }
+    .layout-grid .tile-media img { width: 100%; height: 100%; object-fit: cover; }
+    .layout-grid .tile--text { aspect-ratio: 1 / 1; overflow: hidden; }
+
+    .layout-single .gallery { max-width: 1100px; }
+    .layout-single .grid { gap: calc(var(--gutter) * 4); }
+    .layout-single .tile-media img { max-height: 88vh; width: auto; margin: 0 auto; }
+    .layout-single .tile-caption { position: static; opacity: 1; background: none; color: var(--muted); padding: 12px 0 0; text-align: center; transform: none; }
+
+    @media (max-width: 1100px) {
+      .layout-grid .grid { grid-template-columns: repeat(min(var(--columns), 3), minmax(0, 1fr)); }
+      .layout-masonry .grid { columns: min(var(--columns), 3); }
+    }
+    @media (max-width: 760px) {
+      .site-header { padding: 32px 16px 28px; }
+      .gallery, .page-heading { padding-left: 16px; padding-right: 16px; }
+      .layout-grid .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .layout-masonry .grid { columns: 2; }
+    }
+    @media (max-width: 480px) {
+      .layout-grid .grid { grid-template-columns: 1fr; }
+      .layout-masonry .grid { columns: 1; }
+    }
+
+    /* ---------- Tiles ---------- */
+    .tile { position: relative; margin: 0; min-width: 0; }
+    .tile-link { display: block; position: relative; overflow: hidden; background: color-mix(in srgb, var(--text) 6%, transparent); }
+    .tile-media { display: block; }
+    .tile-media img { width: 100%; transition: transform .6s cubic-bezier(.2,.7,.2,1), opacity .4s; }
+    .tile-media img:not(:first-child) { display: none; }
+    .tile-link:hover .tile-media img { transform: scale(1.02); }
+    .tile-count {
+      position: absolute; top: 10px; right: 10px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(0,0,0,.55);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .04em;
+      pointer-events: none;
+    }
+    .tile-caption {
+      position: absolute; left: 0; right: 0; bottom: 0;
+      padding: 40px 16px 14px;
+      background: linear-gradient(transparent, rgba(0,0,0,.6));
+      color: #fff;
+      font-size: 13px;
+      line-height: 1.45;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity .3s, transform .3s;
+      pointer-events: none;
+    }
+    .tile-caption p { margin: 0; }
+    .tile-caption p + p { display: none; }
+    .tile-caption a { color: inherit; }
+    .tile-link:hover .tile-caption,
+    .tile-link:focus-visible .tile-caption { opacity: 1; transform: none; }
+    @media (hover: none) { .tile-caption { display: none; } .layout-single .tile-caption { display: block; } }
+
+    .tile--text {
+      padding: 24px;
+      border: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+      font-size: 14px;
+    }
+    .tile--text .tile-link { background: none; overflow: visible; }
+    .tile--text h3 { margin: 0 0 8px; font: 400 22px/1.2 var(--heading); }
+    .tile--text .tile-body { color: var(--muted); display: -webkit-box; -webkit-line-clamp: 8; -webkit-box-orient: vertical; overflow: hidden; }
+    .tile--text .tile-body p { margin: 0 0 .6em; }
+    .tile--text .tile-body img { margin: 0 0 .8em; }
+    .tile--text blockquote { margin: 0; font: italic 400 22px/1.3 var(--heading); color: var(--text); }
+    .tile-type { display: block; margin-top: 12px; font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+
+    .protect-images img { -webkit-user-drag: none; user-select: none; -webkit-touch-callout: none; }
+
+    /* ---------- Pagination ---------- */
+    .pagination {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 56px 24px 24px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 28px;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .pagination a { color: var(--text); }
+    .load-more {
+      appearance: none;
+      border: 1px solid currentColor;
+      background: none;
+      color: var(--text);
+      padding: 12px 28px;
+      font: inherit;
+      letter-spacing: inherit;
+      text-transform: inherit;
+      cursor: pointer;
+    }
+    .load-more:hover { color: var(--accent); }
+    .load-more[disabled] { opacity: .4; cursor: default; }
+    .js-paginated .pagination-classic { display: none; }
+    .pagination-sentinel { height: 1px; }
+
+    /* ---------- Permalink ---------- */
+    .entry { max-width: 1400px; margin: 0 auto; padding: 0 24px; }
+    .entry-photos { display: flex; flex-direction: column; gap: var(--gutter); align-items: center; }
+    .entry-photo { margin: 0; width: 100%; }
+    .entry-photo img {
+      margin: 0 auto;
+      max-height: 90vh;
+      width: auto;
+      cursor: zoom-in;
+    }
+    .entry-photo figcaption { margin-top: 8px; text-align: center; color: var(--muted); font-size: 13px; }
+    .entry-meta {
+      max-width: 720px;
+      margin: 36px auto 0;
+      padding: 0 0 8px;
+    }
+    .entry-title { margin: 0 0 16px; font: 400 clamp(28px, 4vw, 42px)/1.15 var(--heading); }
+    .entry-body { font-size: 16px; line-height: 1.7; }
+    .entry-body > :first-child { margin-top: 0; }
+    .entry-body a { color: var(--accent); }
+    .entry-body a:hover { text-decoration: underline; }
+    .entry-body blockquote { margin: 1em 0; padding-left: 18px; border-left: 2px solid color-mix(in srgb, var(--text) 20%, transparent); color: var(--muted); }
+    .entry-body figure { margin: 1.5em 0; }
+    .entry-body .tmblr-full img, .entry-body figure img { width: 100%; }
+    .entry-quote { margin: 0; font: italic 400 clamp(26px, 4vw, 40px)/1.3 var(--heading); }
+    .entry-source { margin-top: 12px; color: var(--muted); }
+    .exif {
+      display: flex; flex-wrap: wrap; gap: 6px 20px;
+      margin: 24px 0 0; padding: 14px 0;
+      border-top: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+      border-bottom: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+      list-style: none;
+      font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted);
+    }
+    .exif:empty { display: none; }
+    .exif li::before { content: attr(data-label) " "; font-weight: 600; color: var(--text); }
+    .entry-footer {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px;
+      margin-top: 24px;
+      font-size: 13px; color: var(--muted);
+    }
+    .entry-tags { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+    .entry-tags a:hover { color: var(--accent); }
+    .entry-actions { display: flex; align-items: center; gap: 14px; }
+    .entry-actions .like_button, .entry-actions .reblog_button { display: inline-flex; }
+    .entry-actions svg { width: 20px; height: 20px; }
+    .entry-actions svg path { fill: var(--muted) !important; }
+    .reblog-credit { margin-top: 10px; font-size: 13px; color: var(--muted); }
+    .reblog-credit a { color: var(--text); }
+    .post-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      max-width: 720px; margin: 48px auto 0; padding: 0 24px;
+      font-size: 13px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase;
+    }
+    .post-nav .next { margin-left: auto; }
+    .notes { max-width: 720px; margin: 56px auto 0; padding: 0 24px; font-size: 13px; color: var(--muted); }
+    .notes h3 { margin: 0 0 12px; font: 400 20px/1.2 var(--heading); color: var(--text); }
+    .notes ol.notes { padding: 0; margin: 0; list-style: none; }
+    .notes ol.notes li { padding: 6px 0; border-bottom: 1px solid color-mix(in srgb, var(--text) 8%, transparent); }
+    .notes img.avatar { display: inline-block; width: 18px; height: 18px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+
+    /* ---------- Footer ---------- */
+    .site-footer {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 72px 24px 40px;
+      display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 24px;
+      font-size: 12px; color: var(--muted);
+    }
+    .site-footer ul { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 0; padding: 0; list-style: none; }
+    .site-footer a:hover { color: var(--accent); }
+    .search-form input {
+      width: 180px; max-width: 100%;
+      padding: 6px 0;
+      border: 0; border-bottom: 1px solid color-mix(in srgb, var(--text) 25%, transparent);
+      background: none; color: var(--text); font: inherit;
+    }
+    .search-form input:focus { outline: none; border-color: var(--accent); }
+
+    /* ---------- Lightbox ---------- */
+    .lightbox {
+      position: fixed; inset: 0; z-index: 1000;
+      display: grid; grid-template-rows: auto 1fr auto;
+      background: var(--lightbox-bg);
+      color: #f2f2f2;
+      opacity: 0; visibility: hidden;
+      transition: opacity .25s, visibility 0s linear .25s;
+    }
+    .lightbox.is-open { opacity: 1; visibility: visible; transition: opacity .25s; }
+    .lightbox-bar {
+      display: flex; justify-content: space-between; align-items: center; gap: 16px;
+      padding: 14px 18px;
+      font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
+    }
+    .lightbox-bar a { color: inherit; opacity: .75; }
+    .lightbox-bar a:hover { opacity: 1; }
+    .lightbox-stage { position: relative; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 0 64px; }
+    .lightbox-stage img {
+      max-width: 100%; max-height: 100%;
+      width: auto; height: auto;
+      object-fit: contain;
+      user-select: none;
+      transition: opacity .2s;
+    }
+    .lightbox-stage img.is-loading { opacity: .25; }
+    .lightbox-caption { min-height: 48px; padding: 12px 24px 20px; text-align: center; font-size: 13px; opacity: .8; }
+    .lightbox-caption p { margin: 0; }
+    .lightbox button {
+      appearance: none; border: 0; background: none; color: inherit; cursor: pointer;
+      padding: 8px; opacity: .7; font: inherit;
+    }
+    .lightbox button:hover { opacity: 1; }
+    .lightbox-prev, .lightbox-next { position: absolute; top: 50%; transform: translateY(-50%); }
+    .lightbox-prev { left: 8px; }
+    .lightbox-next { right: 8px; }
+    .lightbox svg { width: 28px; height: 28px; stroke: currentColor; fill: none; stroke-width: 1.5; display: block; }
+    @media (max-width: 760px) {
+      .lightbox-stage { padding: 0 8px; }
+      .lightbox-prev, .lightbox-next { display: none; }
+    }
+    body.lightbox-open { overflow: hidden; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition: none !important; }
+    }
+
+    {CustomCSS}
+  </style>
+</head>
+
+<body class="layout-{select:Layout} typeface-{select:Typeface} pagination-{select:Pagination}{block:IfProtectImages} protect-images{/block:IfProtectImages}{block:PermalinkPage} is-permalink{/block:PermalinkPage}{block:IndexPage} is-index{/block:IndexPage}"
+      data-lightbox="{block:IfUseLightbox}1{/block:IfUseLightbox}{block:IfNotUseLightbox}0{/block:IfNotUseLightbox}"
+      data-columns="{select:Columns}">
+
+  <header class="site-header">
+    <div class="brand">
+      <a href="/" class="brand-home">
+        {block:IfLogoImage}<span class="brand-logo"><img src="{image:Logo}" alt="{Title}"></span><h1 class="visually-hidden">{Title}</h1>{/block:IfLogoImage}
+        {block:IfNotLogoImage}<h1 class="brand-title">{Title}</h1>{/block:IfNotLogoImage}
+      </a>
+      {block:IfShowDescription}{block:Description}<div class="brand-description">{Description}</div>{/block:Description}{/block:IfShowDescription}
+    </div>
+
+    <nav class="site-nav" aria-label="Main">
+      <ul>
+        <li><a href="/">Work</a></li>
+        {block:HasPages}{block:Pages}<li><a href="{URL}">{Label}</a></li>{/block:Pages}{/block:HasPages}
+        {block:IfInstagramUsername}<li><a href="https://instagram.com/{text:Instagram Username}" rel="noopener" target="_blank">Instagram</a></li>{/block:IfInstagramUsername}
+        {block:IfEmailAddress}<li><a href="mailto:{text:Email Address}">Contact</a></li>{/block:IfEmailAddress}
+      </ul>
+    </nav>
+  </header>
+
+  {block:TagPage}
+  <div class="page-heading">
+    <h2>#{Tag}</h2>
+  </div>
+  {/block:TagPage}
+
+  {block:SearchPage}
+  <div class="page-heading">
+    <h2>“{SearchQuery}”</h2>
+    <p>{SearchResultCount} results</p>
+    {block:NoSearchResults}<p>Nothing found. Try another word.</p>{/block:NoSearchResults}
+  </div>
+  {/block:SearchPage}
+
+  <!-- ============================== Index / tag / search ============================== -->
+  {block:IndexPage}
+  <main class="gallery" id="gallery">
+    <div class="grid" id="grid">
+      {block:Posts}
+
+      {block:Photo}
+      <figure class="tile tile--photo" id="post-{PostID}">
+        <a class="tile-link" href="{Permalink}" data-lightbox-item
+           data-src="{PhotoURL-HighRes}" data-width="{PhotoWidth-HighRes}" data-height="{PhotoHeight-HighRes}"
+           data-alt="{PhotoAlt}" data-permalink="{Permalink}">
+          <span class="tile-media">
+            <img src="{PhotoURL-1280}" alt="{PhotoAlt}" width="{PhotoWidth-HighRes}" height="{PhotoHeight-HighRes}" loading="lazy" decoding="async">
+          </span>
+          {block:IfShowCaptionsOnHover}{block:Caption}<figcaption class="tile-caption">{Caption}</figcaption>{/block:Caption}{/block:IfShowCaptionsOnHover}
+        </a>
+        {block:Caption}<template class="lightbox-caption-source">{Caption}</template>{/block:Caption}
+      </figure>
+      {/block:Photo}
+
+      {block:Photoset}
+      <figure class="tile tile--photoset" id="post-{PostID}">
+        <a class="tile-link" href="{Permalink}" data-permalink="{Permalink}">
+          <span class="tile-media">
+            {block:Photos}<img src="{PhotoURL-1280}" alt="{PhotoAlt}" width="{PhotoWidth-HighRes}" height="{PhotoHeight-HighRes}" loading="lazy" decoding="async"
+                 data-lightbox-item data-src="{PhotoURL-HighRes}" data-width="{PhotoWidth-HighRes}" data-height="{PhotoHeight-HighRes}" data-alt="{PhotoAlt}">{/block:Photos}
+          </span>
+          <span class="tile-count" aria-hidden="true"></span>
+          {block:IfShowCaptionsOnHover}{block:Caption}<figcaption class="tile-caption">{Caption}</figcaption>{/block:Caption}{/block:IfShowCaptionsOnHover}
+        </a>
+        {block:Caption}<template class="lightbox-caption-source">{Caption}</template>{/block:Caption}
+      </figure>
+      {/block:Photoset}
+
+      {block:IfNotHideNonPhotoPosts}
+      {block:Text}
+      <article class="tile tile--text" id="post-{PostID}">
+        <a class="tile-link" href="{Permalink}">
+          {block:Title}<h3>{Title}</h3>{/block:Title}
+          <div class="tile-body">{Body}</div>
+          <span class="tile-type">Read</span>
+        </a>
+      </article>
+      {/block:Text}
+
+      {block:Quote}
+      <article class="tile tile--text" id="post-{PostID}">
+        <a class="tile-link" href="{Permalink}">
+          <blockquote>{Quote}</blockquote>
+          {block:Source}<div class="tile-body">— {Source}</div>{/block:Source}
+        </a>
+      </article>
+      {/block:Quote}
+
+      {block:Link}
+      <article class="tile tile--text" id="post-{PostID}">
+        <a class="tile-link" href="{URL}" {Target}>
+          <h3>{Name}</h3>
+          {block:Description}<div class="tile-body">{Description}</div>{/block:Description}
+          <span class="tile-type">Link ↗</span>
+        </a>
+      </article>
+      {/block:Link}
+
+      {block:Video}
+      <article class="tile tile--text tile--video" id="post-{PostID}">
+        {Video-500}
+        {block:Caption}<div class="tile-body">{Caption}</div>{/block:Caption}
+        <a class="tile-type" href="{Permalink}">Video</a>
+      </article>
+      {/block:Video}
+      {/block:IfNotHideNonPhotoPosts}
+
+      {/block:Posts}
+    </div>
+  </main>
+
+  {block:Pagination}
+  <nav class="pagination pagination-classic" aria-label="Pagination">
+    {block:PreviousPage}<a href="{PreviousPage}" rel="prev">← Newer</a>{/block:PreviousPage}
+    <span>{CurrentPage} / {TotalPages}</span>
+    {block:NextPage}<a href="{NextPage}" rel="next" id="next-page">Older →</a>{/block:NextPage}
+  </nav>
+  {/block:Pagination}
+  {/block:IndexPage}
+
+  <!-- ================================== Permalink ================================== -->
+  {block:PermalinkPage}
+  <main>
+    {block:Posts}
+    <article class="entry" id="post-{PostID}">
+
+      {block:Photo}
+      <div class="entry-photos">
+        <figure class="entry-photo">
+          <img src="{PhotoURL-HighRes}" alt="{PhotoAlt}" width="{PhotoWidth-HighRes}" height="{PhotoHeight-HighRes}"
+               data-lightbox-item data-src="{PhotoURL-HighRes}" data-width="{PhotoWidth-HighRes}" data-height="{PhotoHeight-HighRes}" data-alt="{PhotoAlt}">
+        </figure>
+      </div>
+      <div class="entry-meta">
+        {block:Caption}<div class="entry-body">{Caption}</div>{/block:Caption}
+        {block:IfShowCameraInfo}{block:Exif}
+        <ul class="exif">{block:Camera}<li data-label="Camera">{Camera}</li>{/block:Camera}{block:FocalLength}<li data-label="Focal">{FocalLength}</li>{/block:FocalLength}{block:Aperture}<li data-label="Aperture">{Aperture}</li>{/block:Aperture}{block:Exposure}<li data-label="Shutter">{Exposure}</li>{/block:Exposure}</ul>
+        {/block:Exif}{/block:IfShowCameraInfo}
+      {/block:Photo}
+
+      {block:Photoset}
+      <div class="entry-photos">
+        {block:Photos}
+        <figure class="entry-photo">
+          <img src="{PhotoURL-HighRes}" alt="{PhotoAlt}" width="{PhotoWidth-HighRes}" height="{PhotoHeight-HighRes}" loading="lazy"
+               data-lightbox-item data-src="{PhotoURL-HighRes}" data-width="{PhotoWidth-HighRes}" data-height="{PhotoHeight-HighRes}" data-alt="{PhotoAlt}">
+          {block:Caption}<figcaption>{Caption}</figcaption>{/block:Caption}
+          {block:IfShowCameraInfo}{block:Exif}
+          <ul class="exif">{block:Camera}<li data-label="Camera">{Camera}</li>{/block:Camera}{block:FocalLength}<li data-label="Focal">{FocalLength}</li>{/block:FocalLength}{block:Aperture}<li data-label="Aperture">{Aperture}</li>{/block:Aperture}{block:Exposure}<li data-label="Shutter">{Exposure}</li>{/block:Exposure}</ul>
+          {/block:Exif}{/block:IfShowCameraInfo}
+        </figure>
+        {/block:Photos}
+      </div>
+      <div class="entry-meta">
+        {block:Caption}<div class="entry-body">{Caption}</div>{/block:Caption}
+      {/block:Photoset}
+
+      {block:Text}
+      <div class="entry-meta">
+        {block:Title}<h2 class="entry-title">{Title}</h2>{/block:Title}
+        <div class="entry-body">{Body}</div>
+      {/block:Text}
+
+      {block:Quote}
+      <div class="entry-meta">
+        <blockquote class="entry-quote">{Quote}</blockquote>
+        {block:Source}<div class="entry-source">— {Source}</div>{/block:Source}
+      {/block:Quote}
+
+      {block:Link}
+      <div class="entry-meta">
+        <h2 class="entry-title"><a href="{URL}" {Target}>{Name} ↗</a></h2>
+        {block:Description}<div class="entry-body">{Description}</div>{/block:Description}
+      {/block:Link}
+
+      {block:Video}
+      <div class="entry-photos">{Video-700}</div>
+      <div class="entry-meta">
+        {block:Caption}<div class="entry-body">{Caption}</div>{/block:Caption}
+      {/block:Video}
+
+      {block:Audio}
+      <div class="entry-meta">
+        {AudioEmbed}
+        {block:Caption}<div class="entry-body">{Caption}</div>{/block:Caption}
+      {/block:Audio}
+
+      {block:Chat}
+      <div class="entry-meta">
+        {block:Title}<h2 class="entry-title">{Title}</h2>{/block:Title}
+        <div class="entry-body">{block:Lines}<p>{block:Label}<strong>{Label}</strong> {/block:Label}{Line}</p>{/block:Lines}</div>
+      {/block:Chat}
+
+      {block:Answer}
+      <div class="entry-meta">
+        <div class="entry-body"><blockquote>{Asker}: {Question}</blockquote>{Answer}</div>
+      {/block:Answer}
+
+        {block:RebloggedFrom}
+        <div class="reblog-credit">via <a href="{ReblogParentURL}">{ReblogParentName}</a>{block:RebloggedFromReblog} · originally <a href="{ReblogRootURL}">{ReblogRootName}</a>{/block:RebloggedFromReblog}</div>
+        {/block:RebloggedFrom}
+
+        {block:Date}
+        <footer class="entry-footer">
+          <div>
+            <time datetime="{Year}-{MonthNumberWithZero}-{DayOfMonthWithZero}">{Month} {DayOfMonth}, {Year}</time>
+            {block:NoteCount} · {NoteCountWithLabel}{/block:NoteCount}
+          </div>
+          {block:HasTags}<div class="entry-tags">{block:Tags}<a href="{TagURL}">#{Tag}</a>{/block:Tags}</div>{/block:HasTags}
+          <div class="entry-actions">{LikeButton size="20"}{ReblogButton size="20"}</div>
+        </footer>
+        {/block:Date}
+      </div><!-- /.entry-meta -->
+    </article>
+
+    {block:PermalinkPagination}
+    <nav class="post-nav" aria-label="Post navigation">
+      {block:NextPost}<a href="{NextPost}" class="prev" rel="prev">← Newer</a>{/block:NextPost}
+      {block:PreviousPost}<a href="{PreviousPost}" class="next" rel="next">Older →</a>{/block:PreviousPost}
+    </nav>
+    {/block:PermalinkPagination}
+
+    {block:PostNotes}
+    <section class="notes">
+      <h3>Notes</h3>
+      {PostNotes}
+    </section>
+    {/block:PostNotes}
+    {/block:Posts}
+  </main>
+  {/block:PermalinkPage}
+
+  <footer class="site-footer">
+    <div>&copy; {CopyrightYears} {Title}{block:IfFooterText} · {text:Footer Text}{/block:IfFooterText}</div>
+    <ul>
+      {block:IfWebsiteURL}<li><a href="{text:Website URL}" rel="noopener">Website</a></li>{/block:IfWebsiteURL}
+      <li><a href="{RSS}">RSS</a></li>
+      <li>
+        <form class="search-form" action="/search" method="get" role="search">
+          <label class="visually-hidden" for="search-q">Search</label>
+          <input id="search-q" type="search" name="q" value="{SearchQuery}" placeholder="Search">
+        </form>
+      </li>
+    </ul>
+  </footer>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer" aria-hidden="true">
+    <div class="lightbox-bar">
+      <span class="lightbox-counter" aria-live="polite"></span>
+      <span>
+        <a class="lightbox-permalink" href="#">View post</a>
+        <button type="button" class="lightbox-close" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </span>
+    </div>
+    <div class="lightbox-stage">
+      <button type="button" class="lightbox-prev" aria-label="Previous photo"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <img alt="">
+      <button type="button" class="lightbox-next" aria-label="Next photo"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+    </div>
+    <div class="lightbox-caption"></div>
+  </div>
+
+  <script>
+  (function () {
+    'use strict';
+
+    var body = document.body;
+    var grid = document.getElementById('grid');
+    var useLightbox = body.getAttribute('data-lightbox') === '1';
+    var maxColumns = parseInt(body.getAttribute('data-columns'), 10) || 3;
+
+    /* ---------- Tile preparation ---------- */
+    function prepareTiles(root) {
+      root.querySelectorAll('.tile--photoset').forEach(function (tile) {
+        var n = tile.querySelectorAll('.tile-media img').length;
+        var badge = tile.querySelector('.tile-count');
+        if (badge && n > 1) badge.textContent = '1 / ' + n;
+        else if (badge) badge.remove();
+      });
+    }
+
+    /* ---------- Masonry: balanced columns that keep chronological reading order ---------- */
+    var tiles = [];
+    function columnCount() {
+      var w = window.innerWidth;
+      if (w <= 480) return 1;
+      if (w <= 760) return Math.min(2, maxColumns);
+      if (w <= 1100) return Math.min(3, maxColumns);
+      return maxColumns;
+    }
+    function tileWeight(tile) {
+      var img = tile.querySelector('.tile-media img');
+      if (img) {
+        var w = parseFloat(img.getAttribute('width')), h = parseFloat(img.getAttribute('height'));
+        if (w > 0 && h > 0) return h / w;
+      }
+      return null;
+    }
+    function arrange() {
+      if (!grid || !body.classList.contains('layout-masonry')) return;
+      var count = columnCount();
+      grid.classList.remove('is-arranged');
+      grid.querySelectorAll('.grid-column').forEach(function (c) { c.remove(); });
+      if (count <= 1) { tiles.forEach(function (t) { grid.appendChild(t); }); return; }
+
+      var cols = [], heights = [];
+      for (var i = 0; i < count; i++) {
+        var col = document.createElement('div');
+        col.className = 'grid-column';
+        grid.appendChild(col);
+        cols.push(col);
+        heights.push(0);
+      }
+      grid.classList.add('is-arranged');
+      var colWidth = cols[0].getBoundingClientRect().width || 1;
+      tiles.forEach(function (tile) {
+        var shortest = heights.indexOf(Math.min.apply(null, heights));
+        cols[shortest].appendChild(tile);
+        var ratio = tileWeight(tile);
+        heights[shortest] += (ratio ? ratio * colWidth : tile.getBoundingClientRect().height) + 1;
+      });
+    }
+    function collectTiles(root) {
+      return Array.prototype.slice.call(root.querySelectorAll('.tile'));
+    }
+    if (grid) {
+      prepareTiles(grid);
+      tiles = collectTiles(grid);
+      arrange();
+      var lastCount = columnCount(), resizeTimer;
+      window.addEventListener('resize', function () {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function () {
+          if (columnCount() !== lastCount) { lastCount = columnCount(); arrange(); }
+        }, 150);
+      });
+    }
+
+    /* ---------- Pagination: infinite scroll / load more ---------- */
+    var mode = (body.className.match(/pagination-(\w+)/) || [])[1];
+    var nextLink = document.getElementById('next-page');
+    if (grid && nextLink && (mode === 'infinite' || mode === 'button')) {
+      body.classList.add('js-paginated');
+      var nextUrl = nextLink.getAttribute('href');
+      var loading = false;
+      var holder = document.createElement('div');
+      holder.className = 'pagination';
+      var button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'load-more';
+      button.textContent = 'Load more';
+      holder.appendChild(button);
+      grid.parentNode.parentNode.insertBefore(holder, grid.parentNode.nextSibling);
+
+      var loadNext = function () {
+        if (loading || !nextUrl) return;
+        loading = true;
+        button.disabled = true;
+        button.textContent = 'Loading…';
+        fetch(nextUrl, { credentials: 'same-origin' })
+          .then(function (r) { return r.text(); })
+          .then(function (html) {
+            var doc = new DOMParser().parseFromString(html, 'text/html');
+            var newGrid = doc.getElementById('grid');
+            var newTiles = newGrid ? collectTiles(newGrid) : [];
+            prepareTiles(newGrid || doc);
+            newTiles.forEach(function (t) {
+              var node = document.importNode(t, true);
+              tiles.push(node);
+              grid.appendChild(node);
+            });
+            arrange();
+            var n = doc.getElementById('next-page');
+            nextUrl = n ? n.getAttribute('href') : null;
+            if (window.history && window.history.replaceState && newTiles.length) {
+              // keep the URL shareable-ish without breaking the back button
+            }
+          })
+          .catch(function () { /* fall through; user can retry */ })
+          .then(function () {
+            loading = false;
+            button.disabled = false;
+            button.textContent = 'Load more';
+            if (!nextUrl) holder.remove();
+            else if (mode === 'infinite') checkSentinel();
+          });
+      };
+      button.addEventListener('click', loadNext);
+
+      if (mode === 'infinite' && 'IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (entries) {
+          if (entries[0].isIntersecting) loadNext();
+        }, { rootMargin: '1200px 0px' });
+        io.observe(holder);
+        var checkSentinel = function () {
+          if (holder.isConnected && holder.getBoundingClientRect().top < window.innerHeight + 1200) loadNext();
+        };
+      } else {
+        var checkSentinel = function () {};
+      }
+    }
+
+    /* ---------- Image protection (optional, deterrent only) ---------- */
+    if (body.classList.contains('protect-images')) {
+      document.addEventListener('contextmenu', function (e) {
+        if (e.target.tagName === 'IMG') e.preventDefault();
+      });
+      document.addEventListener('dragstart', function (e) {
+        if (e.target.tagName === 'IMG') e.preventDefault();
+      });
+    }
+
+    /* ---------- Lightbox ---------- */
+    if (!useLightbox) return;
+    var lb = document.getElementById('lightbox');
+    var lbImg = lb.querySelector('.lightbox-stage img');
+    var lbCaption = lb.querySelector('.lightbox-caption');
+    var lbCounter = lb.querySelector('.lightbox-counter');
+    var lbPermalink = lb.querySelector('.lightbox-permalink');
+    var items = [], index = 0, lastFocus = null;
+
+    function collectItems() {
+      return Array.prototype.slice.call(document.querySelectorAll('main [data-lightbox-item]')).map(function (el) {
+        var tile = el.closest('.tile, .entry');
+        var capSrc = tile && tile.querySelector('.lightbox-caption-source');
+        var linkEl = el.closest('[data-permalink]');
+        return {
+          el: el,
+          src: el.getAttribute('data-src'),
+          alt: el.getAttribute('data-alt') || '',
+          caption: capSrc ? capSrc.innerHTML : '',
+          permalink: linkEl ? linkEl.getAttribute('data-permalink') : ''
+        };
+      });
+    }
+    function show(i) {
+      if (!items.length) return;
+      index = (i + items.length) % items.length;
+      var item = items[index];
+      lbImg.classList.add('is-loading');
+      lbImg.onload = function () { lbImg.classList.remove('is-loading'); };
+      lbImg.src = item.src;
+      lbImg.alt = item.alt;
+      lbCaption.innerHTML = item.caption;
+      lbCounter.textContent = (index + 1) + ' / ' + items.length;
+      lbPermalink.style.display = item.permalink ? '' : 'none';
+      lbPermalink.href = item.permalink || '#';
+      // preload neighbours
+      [index + 1, index - 1].forEach(function (j) {
+        var n = items[(j + items.length) % items.length];
+        if (n) { var p = new Image(); p.src = n.src; }
+      });
+    }
+    function open(el) {
+      items = collectItems();
+      var i = items.findIndex(function (it) { return it.el === el; });
+      lastFocus = document.activeElement;
+      show(i < 0 ? 0 : i);
+      lb.classList.add('is-open');
+      lb.setAttribute('aria-hidden', 'false');
+      body.classList.add('lightbox-open');
+      lb.querySelector('.lightbox-close').focus();
+    }
+    function close() {
+      lb.classList.remove('is-open');
+      lb.setAttribute('aria-hidden', 'true');
+      body.classList.remove('lightbox-open');
+      if (lastFocus) lastFocus.focus();
+    }
+
+    document.addEventListener('click', function (e) {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      var link = e.target.closest('main .tile-link');
+      var target = null;
+      if (link) {
+        target = link.hasAttribute('data-lightbox-item') ? link : link.querySelector('[data-lightbox-item]');
+      } else if (e.target.matches('.entry [data-lightbox-item]')) {
+        target = e.target;
+      }
+      if (!target) return;
+      e.preventDefault();
+      open(target);
+    });
+
+    lb.querySelector('.lightbox-close').addEventListener('click', close);
+    lb.querySelector('.lightbox-prev').addEventListener('click', function () { show(index - 1); });
+    lb.querySelector('.lightbox-next').addEventListener('click', function () { show(index + 1); });
+    lb.querySelector('.lightbox-stage').addEventListener('click', function (e) {
+      if (e.target === this) close();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (!lb.classList.contains('is-open')) return;
+      if (e.key === 'Escape') close();
+      else if (e.key === 'ArrowLeft') show(index - 1);
+      else if (e.key === 'ArrowRight') show(index + 1);
+      else if (e.key === 'Tab') {
+        var f = Array.prototype.filter.call(lb.querySelectorAll('a, button'), function (x) { return x.offsetParent; });
+        if (!f.length) return;
+        if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); }
+        else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
+      }
+    });
+
+    var touchX = null;
+    lb.addEventListener('touchstart', function (e) { touchX = e.touches[0].clientX; }, { passive: true });
+    lb.addEventListener('touchend', function (e) {
+      if (touchX === null) return;
+      var dx = e.changedTouches[0].clientX - touchX;
+      if (Math.abs(dx) > 50) show(index + (dx < 0 ? 1 : -1));
+      touchX = null;
+    });
+  })();
+  </script>
+</body>
+</html>
