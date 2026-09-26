@@ -1,179 +1,179 @@
-// Minimal Tumblr theme renderer for local preview.
-// Fills a small, representative subset of Tumblr template tags/blocks with sample data.
-const fs = require('fs');
+// Local preview renderer for fyi-photos Tumblr theme.
+// Fills Tumblr template tags with sample data so you can open the
+// output in a browser without uploading to Tumblr.
+//
+// Usage:
+//   node scripts/render.js theme.html out/index.html index
+//   node scripts/render.js theme.html out/permalink.html permalink
+//   PAGE=tag TAG=portraits node scripts/render.js theme.html out/tag.html tag
+
+'use strict';
+const fs   = require('fs');
 const path = require('path');
 
-const themePath = process.argv[2];
-const outPath = process.argv[3];
-const page = process.argv[4] || 'index'; // 'index' | 'permalink'
+const srcFile = process.argv[2];
+const outFile = process.argv[3];
+const pageType = process.env.PAGE || process.argv[4] || 'index'; // index | permalink | tag
 
-let html = fs.readFileSync(themePath, 'utf8');
-
-// ---- theme option defaults (from meta tags) ----
-const opts = {};
-html.replace(/<meta name="color:([^"]+)" content="([^"]*)"/g, (m,k,v)=>{opts['color:'+k]=v;});
-html.replace(/<meta name="text:([^"]+)" content="([^"]*)"/g, (m,k,v)=>{opts['text:'+k]=v;});
-html.replace(/<meta name="image:([^"]+)" content="([^"]*)"/g, (m,k,v)=>{opts['image:'+k]=v;});
-// first select value = default
-const selects = {};
-html.replace(/<meta name="select:([^"]+)" content="([^"]*)"/g, (m,k,v)=>{ if(!(('select:'+k) in selects)) selects['select:'+k]=v; });
-// allow overrides: LAYOUT=grid COLUMNS=4 TYPEFACE=sans
-if(process.env.LAYOUT) selects['select:Layout']=process.env.LAYOUT;
-if(process.env.COLUMNS) selects['select:Columns']=process.env.COLUMNS;
-if(process.env.GUTTER) selects['select:Gutter']=process.env.GUTTER;
-if(process.env.TYPEFACE) selects['select:Typeface']=process.env.TYPEFACE;
-if(process.env.PAGINATION) selects['select:Pagination']=process.env.PAGINATION;
-// if: toggles — set desired ones
-const toggles = {
-  'Use Lightbox':1,'Show Captions On Hover':1,'Show Camera Info':1,
-  'Hide Non Photo Posts':0,'Show Description':1,'Protect Images':0
-};
-
-// sample photos (picsum, fixed seeds for stable dims)
-const photos = [
-  [800,1200],[1200,800],[900,900],[1200,1500],[1500,1000],
-  [1000,1400],[1400,930],[800,1000],[1100,1100],[1600,1067],
-  [900,1350],[1300,867]
-];
-function img(w,h,seed){
-  const hues=[24,200,150,340,45,275,15,190];
-  const hue=hues[seed%hues.length];
-  const svg=`<svg xmlns='http://www.w3.org/2000/svg' width='${w}' height='${h}'>`+
-    `<defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>`+
-    `<stop offset='0' stop-color='hsl(${hue},45%,62%)'/><stop offset='1' stop-color='hsl(${(hue+40)%360},40%,38%)'/></linearGradient></defs>`+
-    `<rect width='100%' height='100%' fill='url(#g)'/>`+
-    `<text x='50%' y='50%' fill='rgba(255,255,255,.85)' font-family='sans-serif' font-size='${Math.round(Math.min(w,h)/8)}' text-anchor='middle' dominant-baseline='middle'>${w}×${h}</text></svg>`;
-  return 'data:image/svg+xml;utf8,'+encodeURIComponent(svg);
+if (!srcFile || !outFile) {
+  console.error('Usage: node render.js <theme.html> <out.html> [index|permalink|tag]');
+  process.exit(1);
 }
 
-const globals = {
-  Title:'Field Notes', RSS:'#', Favicon:'', 'PortraitURL-128':'',
-  MetaDescription:'Photography by A. Nedimyer',
-  Description:'<p>Light, landscape and the occasional stranger. Available for commissions.</p>',
-  CopyrightYears:'2026', SearchQuery:'', CustomCSS:'',
-  Tag:'landscape', SearchResultCount:'8', PostSummary:'',
-  CurrentPage:'1', TotalPages:'4', PreviousPage:'#', NextPage:'/page/2',
-};
+let html = fs.readFileSync(srcFile, 'utf8');
+const outDir = path.dirname(outFile);
+fs.mkdirSync(outDir, { recursive: true });
 
-// ---- resolve if: blocks ----
-function resolveIf(str){
-  Object.keys(toggles).forEach(name=>{
-    const on = toggles[name] === 1;
-    const id = name.replace(/\s+/g,'');
-    // IfNot
-    str = str.replace(new RegExp('\\{block:IfNot'+id+'\\}([\\s\\S]*?)\\{\\/block:IfNot'+id+'\\}','g'), on?'':'$1');
-    str = str.replace(new RegExp('\\{block:If'+id+'\\}([\\s\\S]*?)\\{\\/block:If'+id+'\\}','g'), on?'$1':'');
-  });
-  // text/website/etc "If<Option>" for text options with values
-  ['InstagramUsername','EmailAddress','WebsiteURL','FooterText','LogoImage'].forEach(k=>{
-    const has = k==='LogoImage' ? !!opts['image:Logo'] : false;
-    str = str.replace(new RegExp('\\{block:If'+k+'\\}([\\s\\S]*?)\\{\\/block:If'+k+'\\}','g'), has?'$1':'');
-    str = str.replace(new RegExp('\\{block:IfNot'+k+'\\}([\\s\\S]*?)\\{\\/block:IfNot'+k+'\\}','g'), has?'':'$1');
-  });
+// ── Tumblr option defaults from meta tags ──────────────────────────────────
+const opts = {};
+html.replace(/<meta name="(color|text|image|select|if):([^"]+)"\s+content="([^"]*)"/g, (_, type, name, val) => {
+  const key = `${type}:${name}`;
+  if (!(key in opts)) opts[key] = val;
+});
+// Overrides from env
+if (process.env.LAYOUT)     opts['select:Layout']     = process.env.LAYOUT;
+if (process.env.COLUMNS)    opts['select:Columns']    = process.env.COLUMNS;
+if (process.env.TYPEFACE)   opts['select:Typeface']   = process.env.TYPEFACE;
+
+// ── Sample image helper (inline SVG, no network) ───────────────────────────
+const HUES = [24, 200, 150, 340, 45, 275, 15, 190, 60, 310, 170, 90];
+function svgImg(w, h, seed = 0) {
+  const h1 = HUES[seed % HUES.length];
+  const h2 = HUES[(seed + 4) % HUES.length];
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='${w}' height='${h}'>`
+    + `<defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>`
+    + `<stop offset='0' stop-color='hsl(${h1},38%,62%)'/>`
+    + `<stop offset='1' stop-color='hsl(${h2},34%,42%)'/>`
+    + `</linearGradient></defs>`
+    + `<rect width='100%' height='100%' fill='url(#g)'/>`
+    + `</svg>`;
+  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+}
+
+// ── Block helpers ──────────────────────────────────────────────────────────
+function block(str, name, keep) {
+  return str.replace(
+    new RegExp(`\\{block:${name}\\}([\\s\\S]*?)\\{/block:${name}\\}`, 'g'),
+    keep ? '$1' : ''
+  );
+}
+function stripBlockTags(str, name) {
+  return str
+    .replace(new RegExp(`\\{block:${name}\\}`, 'g'), '')
+    .replace(new RegExp(`\\{/block:${name}\\}`, 'g'), '');
+}
+function toggleBlock(str, name, on) {
+  str = block(str, name, on);
+  str = block(str, 'Not' + name, !on);
   return str;
 }
 
-// Build one photo tile
-function photoTile(i){
-  const [w,h]=photos[i%photos.length];
-  const url=img(w,h,i);
-  return `<figure class="tile tile--photo" id="post-${i}">
-  <a class="tile-link" href="/post/${i}" data-lightbox-item data-src="${url}" data-width="${w}" data-height="${h}" data-alt="Photo ${i}" data-permalink="/post/${i}">
-    <span class="tile-media"><img src="${url}" alt="Photo ${i}" width="${w}" height="${h}" loading="lazy" decoding="async"></span>
-    <figcaption class="tile-caption"><p>Untitled no. ${i} — morning light.</p></figcaption>
-  </a>
-  <template class="lightbox-caption-source"><p>Untitled no. ${i} — morning light on the ridge.</p></template>
+// ── Photo tile HTML ────────────────────────────────────────────────────────
+function photoTile(i, extra = '') {
+  const w = 500, h = [500, 750, 400, 625, 500][i % 5];
+  const src = svgImg(w, h, i);
+  return `
+<figure class="tile tile-grid" data-lb-src="${src}" data-lb-alt="Photo ${i}" data-permalink="/post/${i}">
+  <img src="${src}" alt="Photo ${i}" width="${w}" height="${h}" loading="lazy"${extra}>
 </figure>`;
-}
-function photosetTile(i){
-  const imgs=[0,1,2].map(k=>{const [w,h]=photos[(i+k)%photos.length];const u=img(w,h,i*10+k);
-    return `<img src="${u}" alt="set ${k}" width="${w}" height="${h}" loading="lazy" data-lightbox-item data-src="${u}" data-width="${w}" data-height="${h}" data-alt="set ${k}">`;}).join('');
-  const [w,h]=photos[i%photos.length];
-  return `<figure class="tile tile--photoset" id="post-${i}">
-  <a class="tile-link" href="/post/${i}" data-permalink="/post/${i}">
-    <span class="tile-media">${imgs}</span>
-    <span class="tile-count" aria-hidden="true"></span>
-    <figcaption class="tile-caption"><p>A short series, ${i}.</p></figcaption>
-  </a>
-  <template class="lightbox-caption-source"><p>A short series from the coast, ${i}.</p></template>
-</figure>`;
-}
-function textTile(i){
-  return `<article class="tile tile--text" id="post-${i}">
-  <a class="tile-link" href="/post/${i}"><h3>On patience</h3>
-  <div class="tile-body"><p>Notes from a slow week of shooting. The best frames come when you stop chasing them and let the scene arrive.</p></div>
-  <span class="tile-type">Read</span></a>
-</article>`;
 }
 
-function buildIndexPosts(){
-  let out='';
-  for(let i=1;i<=12;i++){
-    if(i%7===0) out+=textTile(i)+'\n';
-    else if(i%5===0) out+=photosetTile(i)+'\n';
-    else out+=photoTile(i)+'\n';
+function photosetTile(i) {
+  const images = [0, 1, 2].map((k) => {
+    const w = 800, h = 600;
+    const src = svgImg(w, h, i * 3 + k);
+    const cls = k > 0 ? ' class="extra-img"' : '';
+    return `  <img src="${src}" alt="set ${k}" width="${w}" height="${h}" loading="lazy" data-hires="${src}"${cls}>`;
+  }).join('\n');
+  return `
+<figure class="tile tile-grid" data-photoset="1" data-permalink="/post/${i}">
+${images}
+</figure>`;
+}
+
+function buildPosts(n = 18) {
+  let out = '';
+  for (let i = 1; i <= n; i++) {
+    if (i % 6 === 0) out += photosetTile(i);
+    else              out += photoTile(i);
   }
   return out;
 }
 
-// ---- page block selection ----
-function stripBlock(str,name,keep){
-  return str.replace(new RegExp('\\{block:'+name+'\\}([\\s\\S]*?)\\{\\/block:'+name+'\\}','g'), keep?'$1':'');
-}
-
+// ── Page-block selection ───────────────────────────────────────────────────
+const activeTag = process.env.TAG || 'portraits';
 let out = html;
 
-// page-level blocks
-out = stripBlock(out,'IndexPage', page==='index');
-out = stripBlock(out,'PermalinkPage', page==='permalink');
-out = stripBlock(out,'SearchPage', false);
-out = stripBlock(out,'TagPage', false);
-out = stripBlock(out,'PostSummary', false);
-out = stripBlock(out,'HasPages', false);
-out = stripBlock(out,'Pagination', page==='index');
-out = stripBlock(out,'PreviousPage', false);
-out = stripBlock(out,'NextPage', page==='index');
+out = block(out, 'IndexPage',     pageType === 'index');
+out = block(out, 'TagPage',       pageType === 'tag');
+out = block(out, 'SearchPage',    pageType === 'search');
+out = block(out, 'PermalinkPage', pageType === 'permalink');
+
+// Pagination
+out = block(out, 'Pagination',  pageType === 'index' || pageType === 'tag');
+out = block(out, 'NextPage',    pageType === 'index' || pageType === 'tag');
+out = block(out, 'PreviousPage', false);
+
+// Tag detection blocks (Tag1, Tag2, Tag3)
+const tag1 = opts['text:Tag 1 Slug'] || 'portraits';
+const tag2 = opts['text:Tag 2 Slug'] || 't-dock';
+const tag3 = opts['text:Tag 3 Slug'] || 'challis';
+out = block(out, 'Tag1', pageType === 'tag' && activeTag === tag1);
+out = block(out, 'Tag2', pageType === 'tag' && activeTag === tag2);
+out = block(out, 'Tag3', pageType === 'tag' && activeTag === tag3);
+
+// Lightbox
+out = block(out, 'IfUseLightbox', opts['if:Use Lightbox'] !== '0');
 
 // Description
-out = stripBlock(out,'Description', true);
+out = block(out, 'Description', true);
 
-if(page==='index'){
-  // Replace the whole {block:Posts}...{/block:Posts} with generated markup
-  out = out.replace(/\{block:Posts\}[\s\S]*?\{\/block:Posts\}/, buildIndexPosts());
-} else {
-  // permalink: one photo post
-  const [w,h]=photos[0]; const url=img(w,h,101);
-  const single = `<article class="entry" id="post-1">
-  <div class="entry-photos"><figure class="entry-photo"><img src="${url}" alt="lead" width="${w}" height="${h}" data-lightbox-item data-src="${url}" data-width="${w}" data-height="${h}" data-alt="lead"></figure></div>
-  <div class="entry-meta">
-    <div class="entry-body"><p>Shot at first light near the north ridge. A long wait for the fog to lift just enough.</p></div>
-    <ul class="exif"><li data-label="Camera">Leica M11</li><li data-label="Focal">35mm</li><li data-label="Aperture">f/2.8</li><li data-label="Shutter">1/250s</li></ul>
-    <footer class="entry-footer">
-      <div><time>September 20, 2026</time> · 214 notes</div>
-      <div class="entry-tags"><a href="#">#landscape</a><a href="#">#fog</a><a href="#">#leica</a></div>
-      <div class="entry-actions"></div>
-    </footer>
-  </div>
-</article>`;
-  out = out.replace(/\{block:Posts\}[\s\S]*?\{\/block:Posts\}/, single);
+// NoSearchResults
+out = block(out, 'NoSearchResults', false);
+
+// Posts
+if (pageType === 'index' || pageType === 'tag' || pageType === 'search') {
+  out = out.replace(/\{block:Posts\}[\s\S]*?\{\/block:Posts\}/g, buildPosts(18));
+} else if (pageType === 'permalink') {
+  const w = 1200, h = 800;
+  const src = svgImg(w, h, 42);
+  const single = `<img class="permalink-photo" src="${src}" alt="Lead photo" width="${w}" height="${h}">`;
+  out = out.replace(/\{block:Posts\}[\s\S]*?\{\/block:Posts\}/g, single);
 }
 
-// resolve if: toggles
-out = resolveIf(out);
+// Strip remaining block wrapper tags (keep inner content)
+[
+  'Photo','Photoset','Photos','NotFirst','Text','Quote','Link','Video',
+  'Audio','Chat','Answer','Date','HasTags','Tags','NoteCount',
+  'IfShowCameraInfo','Exif','Camera','FocalLength','Aperture','Exposure',
+  'PermalinkPagination','NextPost','PreviousPost','PostNotes','RebloggedFrom',
+  'Caption','Title','Source','Lines','Label',
+].forEach(b => { out = stripBlockTags(out, b); });
 
-// remaining generic blocks that might survive -> drop their wrappers, keep inner
-['Date','HasTags','NoteCount','IfShowCameraInfo','Exif','Camera','FocalLength','Aperture','Exposure','PermalinkPagination','NextPost','PreviousPost','PostNotes','RebloggedFrom','Caption','Title','Source','Photos','Photo','Photoset','Text','Quote','Link','Video','Audio','Chat','Answer','Lines','Label','Tags','NoSearchResults','SearchPage','TagPage'].forEach(b=>{
-  out = out.replace(new RegExp('\\{block:'+b+'\\}','g'),'').replace(new RegExp('\\{\\/block:'+b+'\\}','g'),'');
+// ── Substitute options ─────────────────────────────────────────────────────
+out = out.replace(/\{(color|text|image|select|if):([^}]+)\}/g, (m, type, name) => {
+  return opts[`${type}:${name}`] || '';
 });
 
-// substitute {color:*},{text:*},{image:*},{select:*}
-out = out.replace(/\{(color|text|image|select):([^}]+)\}/g,(m,type,name)=>{
-  const key=type+':'+name;
-  return (key in opts)?opts[key]:(key in selects)?selects[key]:'';
+// ── Substitute global vars ─────────────────────────────────────────────────
+const globals = {
+  Title: 'fyi-photos',
+  RSS: '#',
+  Favicon: '',
+  Tag: activeTag,
+  SearchQuery: '',
+  CurrentPage: '1',
+  TotalPages: '8',
+  NextPage: '/page/2',
+  CustomCSS: '',
+  CopyrightYears: '2026',
+  PostSummary: '',
+};
+out = out.replace(/\{([A-Za-z][A-Za-z0-9_-]*)\}/g, (m, k) => {
+  if (k in globals) return globals[k];
+  // skip unrecognised
+  return '';
 });
 
-// substitute simple globals {Foo}
-out = out.replace(/\{([A-Za-z][A-Za-z0-9-]*)\}/g,(m,k)=> (k in globals)?globals[k]:'');
-
-fs.writeFileSync(outPath,out);
-console.log('wrote',outPath);
+fs.writeFileSync(outFile, out);
+console.log(`✓ ${outFile} (${pageType})`);
