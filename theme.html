@@ -12,9 +12,13 @@
   <meta name="text:Tag 2 Slug"         content="t-dock">
   <meta name="text:Tag 3 Label"        content="Challis">
   <meta name="text:Tag 3 Slug"         content="challis">
+  <!-- Comma-separated list of trip tag slugs so the theme knows which
+       tag pages belong under Travel (activates Travel link + back arrow).
+       Example: mexico,japan,nicaragua,italy -->
+  <meta name="text:Travel Trip Tags"   content="mexico,japan,nicaragua,italy">
   <meta name="if:Use Lightbox"         content="1">
 
-  <title>{Title}{block:TagPage} — #{Tag}{/block:TagPage}{block:SearchPage} — {SearchQuery}{/block:SearchPage}</title>
+  <title>{Title}{block:TagPage} — #{Tag}{/block:TagPage}{block:SearchPage} — {SearchQuery}{/block:SearchPage}{block:PagePage} — {PageTitle}{/block:PagePage}</title>
 
   <link rel="shortcut icon" href="{Favicon}">
   <link rel="alternate" type="application/rss+xml" href="{RSS}">
@@ -22,6 +26,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Travel trip-tag slugs, server-rendered for JS -->
+  <script>var TRAVEL_TAGS='{text:Travel Trip Tags}'.split(',').map(function(s){return s.trim().toLowerCase();});</script>
 
   <style>
     /* ── Reset & tokens ─────────────────────────────────────────── */
@@ -56,8 +63,6 @@
       z-index: 200;
       background: var(--bg);
     }
-
-    /* site label — very muted, top-of-nav feel */
     .sidebar-label {
       position: absolute;
       top: 36px; left: 32px;
@@ -65,8 +70,6 @@
       color: var(--muted);
       letter-spacing: 0.01em;
     }
-
-    /* name */
     .sidebar-name {
       font-size: 13px;
       font-weight: 500;
@@ -74,8 +77,6 @@
       margin-bottom: 14px;
       letter-spacing: -0.01em;
     }
-
-    /* nav links */
     .nav-links {
       list-style: none;
       margin-bottom: 22px;
@@ -106,18 +107,16 @@
       line-height: 0;
       transition: color .12s;
     }
-    .view-toggle button:hover     { color: var(--text); }
-    .view-toggle button.active    { color: var(--text); }
+    .view-toggle button:hover  { color: var(--text); }
+    .view-toggle button.active { color: var(--text); }
     .view-toggle svg { display: block; }
+    /* hide view toggle on pages that don't use it */
+    .no-toggle .view-toggle { visibility: hidden; }
 
     /* ── Main content ───────────────────────────────────────────── */
-    .main {
-      margin-left: var(--nav-w);
-      min-height: 100vh;
-    }
+    .main { margin-left: var(--nav-w); min-height: 100vh; }
 
-    /* ── Grid view ──────────────────────────────────────────────── */
-    .gallery { }
+    /* ── Photo grid ─────────────────────────────────────────────── */
     .gallery-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -130,54 +129,82 @@
       cursor: pointer;
     }
     .tile-grid img {
-      width: 100%;
-      height: 100%;
+      width: 100%; height: 100%;
       object-fit: cover;
       transition: opacity .3s;
-      will-change: opacity;
     }
     .tile-grid img[data-src]:not([src]) { opacity: 0; }
     .tile-grid:hover img { opacity: .88; }
-
-    /* photoset: show only first image in grid */
     .tile-grid .extra-img { display: none; }
 
     /* ── List / stack view ──────────────────────────────────────── */
-    .gallery-list {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-    .tile-list {
-      cursor: pointer;
-      overflow: hidden;
-      background: #f0f0f0;
-    }
-    .tile-list img {
-      width: 100%;
-      height: auto;
-      display: block;
-      transition: opacity .3s;
-    }
+    .gallery-list { display: flex; flex-direction: column; gap: 2px; }
+    .tile-list { cursor: pointer; overflow: hidden; background: #f0f0f0; }
+    .tile-list img { width: 100%; height: auto; display: block; transition: opacity .3s; }
     .tile-list img[data-src]:not([src]) { opacity: 0; }
 
-    /* ── Pagination / load-more ─────────────────────────────────── */
+    /* ── Infinite scroll sentinel ───────────────────────────────── */
     .load-sentinel {
       height: 80px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
     }
     .load-spinner {
       width: 18px; height: 18px;
-      border: 1.5px solid #ddd;
-      border-top-color: #999;
+      border: 1.5px solid #ddd; border-top-color: #999;
       border-radius: 50%;
       animation: spin .7s linear infinite;
       display: none;
     }
     .is-loading .load-spinner { display: block; }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Travel album grid ──────────────────────────────────────── */
+    .travel-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--gap);
+    }
+    @media (min-width: 900px) {
+      .travel-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    .travel-card {
+      position: relative;
+      display: block;
+      aspect-ratio: 4 / 3;
+      overflow: hidden;
+      background: #f0f0f0;
+    }
+    .travel-card img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: opacity .3s;
+    }
+    .travel-card:hover img { opacity: .75; }
+    .travel-card-label {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: flex-end;
+      padding: 14px 18px;
+      background: linear-gradient(transparent 35%, rgba(0,0,0,.55));
+      color: #fff;
+      font-size: 16px;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      pointer-events: none;
+    }
+
+    /* ── Trip breadcrumb (shown on /tagged/mexico etc.) ─────────── */
+    .trip-breadcrumb {
+      display: none;
+      padding: 18px 0 0 0;
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: .04em;
+    }
+    .trip-breadcrumb.visible { display: block; }
+    .trip-breadcrumb a { color: var(--muted); }
+    .trip-breadcrumb a:hover { color: var(--text); }
 
     /* ── Lightbox ───────────────────────────────────────────────── */
     .lb {
@@ -187,10 +214,7 @@
       opacity: 0; visibility: hidden;
       transition: opacity .2s, visibility 0s linear .2s;
     }
-    .lb.open {
-      opacity: 1; visibility: visible;
-      transition: opacity .2s;
-    }
+    .lb.open { opacity: 1; visibility: visible; transition: opacity .2s; }
     .lb-img {
       max-width: calc(100vw - 120px);
       max-height: calc(100vh - 60px);
@@ -217,27 +241,20 @@
     .lb-next { right: 8px; }
     body.lb-open { overflow: hidden; }
 
-    /* ── Permalink page ─────────────────────────────────────────── */
+    /* ── Permalink ──────────────────────────────────────────────── */
     .permalink-wrap {
       padding: 0 0 80px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      display: flex; flex-direction: column; align-items: center;
     }
-    .permalink-photo {
-      width: 100%;
-      max-height: 92vh;
-      object-fit: contain;
-    }
+    .permalink-photo { width: 100%; max-height: 92vh; object-fit: contain; }
     .permalink-set { width: 100%; }
     .permalink-set img { width: 100%; display: block; margin-bottom: 2px; }
 
-    /* ── 404 / empty ────────────────────────────────────────────── */
-    .empty {
-      padding: 120px 48px;
-      color: var(--muted);
-      font-size: 13px;
-    }
+    /* ── Custom page (PagePage) ─────────────────────────────────── */
+    .page-body { padding: 0; }
+
+    /* ── Empty state ────────────────────────────────────────────── */
+    .empty { padding: 120px 48px; color: var(--muted); font-size: 13px; }
 
     /* ── Mobile ─────────────────────────────────────────────────── */
     @media (max-width: 700px) {
@@ -251,10 +268,9 @@
         justify-content: space-between;
         padding: 12px 20px;
         border-top: 1px solid #eee;
-        z-index: 200;
       }
       .sidebar-label { display: none; }
-      .sidebar-name { margin-bottom: 0; font-size: 12px; }
+      .sidebar-name  { margin-bottom: 0; font-size: 12px; }
       .nav-links {
         display: flex; flex-direction: row;
         gap: 0 14px; margin-bottom: 0;
@@ -267,6 +283,7 @@
     }
     @media (max-width: 400px) {
       .gallery-grid { grid-template-columns: repeat(2, 1fr); gap: 2px; }
+      .travel-grid  { grid-template-columns: repeat(1, 1fr); }
     }
 
     {CustomCSS}
@@ -303,18 +320,21 @@
              class="{block:TagPage}{block:Tag3}active{/block:Tag3}{/block:TagPage}"
              id="link-tag3">{text:Tag 3 Label}</a>
         </li>
+        <li>
+          <a href="/travel"
+             class="{block:PagePage}active{/block:PagePage}"
+             id="link-travel">Travel</a>
+        </li>
       </ul>
 
-      <!-- Grid / List toggle -->
+      <!-- Grid / List toggle (hidden on travel index & custom pages) -->
       <div class="view-toggle" id="view-toggle" role="group" aria-label="View">
-        <!-- List icon -->
         <button id="btn-list" type="button" aria-label="List view" title="List">
           <svg width="22" height="16" viewBox="0 0 22 16" fill="none">
             <rect x="0" y="0"  width="22" height="7"  fill="currentColor" rx="1"/>
             <rect x="0" y="9"  width="22" height="7"  fill="currentColor" rx="1"/>
           </svg>
         </button>
-        <!-- Grid icon -->
         <button id="btn-grid" type="button" aria-label="Grid view" title="Grid">
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
             <rect x="0" y="0"  width="8" height="8"  fill="currentColor" rx="1"/>
@@ -330,36 +350,24 @@
   <!-- ═══════════════════════ MAIN ══════════════════════════════ -->
   <main class="main">
 
-    <!-- ──────── Index / Tag / Search pages ──────── -->
+    <!-- ──────── Index ──────── -->
     {block:IndexPage}
-    <div class="gallery" id="gallery" data-view="grid">
+    <div class="gallery" id="gallery">
       <div class="gallery-grid" id="grid">
         {block:Posts}
         {block:Photo}
         <figure class="tile tile-grid"
                 data-lb-src="{PhotoURL-HighRes}"
-                data-lb-alt="{PhotoAlt}"
-                data-permalink="{Permalink}">
-          <img data-src="{PhotoURL-500}"
-               src=""
-               alt="{PhotoAlt}"
-               width="{PhotoWidth-500}"
-               height="{PhotoHeight-500}"
-               loading="lazy">
+                data-lb-alt="{PhotoAlt}">
+          <img data-src="{PhotoURL-500}" src="" alt="{PhotoAlt}"
+               width="{PhotoWidth-500}" height="{PhotoHeight-500}" loading="lazy">
         </figure>
         {/block:Photo}
-
         {block:Photoset}
-        <figure class="tile tile-grid"
-                data-photoset="1"
-                data-permalink="{Permalink}">
+        <figure class="tile tile-grid" data-photoset="1">
           {block:Photos}
-          <img data-src="{PhotoURL-500}"
-               src=""
-               alt="{PhotoAlt}"
-               width="{PhotoWidth-500}"
-               height="{PhotoHeight-500}"
-               loading="lazy"
+          <img data-src="{PhotoURL-500}" src="" alt="{PhotoAlt}"
+               width="{PhotoWidth-500}" height="{PhotoHeight-500}" loading="lazy"
                data-hires="{PhotoURL-HighRes}"
                class="{block:NotFirst}extra-img{/block:NotFirst}">
           {/block:Photos}
@@ -367,41 +375,32 @@
         {/block:Photoset}
         {/block:Posts}
       </div>
-      <div class="load-sentinel" id="sentinel">
-        <div class="load-spinner"></div>
-      </div>
+      <div class="load-sentinel" id="sentinel"><div class="load-spinner"></div></div>
     </div>
     {/block:IndexPage}
 
+    <!-- ──────── Tag pages (category AND individual trips) ──────── -->
     {block:TagPage}
-    <div class="gallery" id="gallery" data-view="grid">
+    <div class="gallery" id="gallery">
+      <!-- Breadcrumb — shown by JS when on a trip tag (e.g. /tagged/mexico) -->
+      <div class="trip-breadcrumb" id="trip-breadcrumb">
+        <a href="/travel">← Travel</a>
+      </div>
       <div class="gallery-grid" id="grid">
         {block:Posts}
         {block:Photo}
         <figure class="tile tile-grid"
                 data-lb-src="{PhotoURL-HighRes}"
-                data-lb-alt="{PhotoAlt}"
-                data-permalink="{Permalink}">
-          <img data-src="{PhotoURL-500}"
-               src=""
-               alt="{PhotoAlt}"
-               width="{PhotoWidth-500}"
-               height="{PhotoHeight-500}"
-               loading="lazy">
+                data-lb-alt="{PhotoAlt}">
+          <img data-src="{PhotoURL-500}" src="" alt="{PhotoAlt}"
+               width="{PhotoWidth-500}" height="{PhotoHeight-500}" loading="lazy">
         </figure>
         {/block:Photo}
-
         {block:Photoset}
-        <figure class="tile tile-grid"
-                data-photoset="1"
-                data-permalink="{Permalink}">
+        <figure class="tile tile-grid" data-photoset="1">
           {block:Photos}
-          <img data-src="{PhotoURL-500}"
-               src=""
-               alt="{PhotoAlt}"
-               width="{PhotoWidth-500}"
-               height="{PhotoHeight-500}"
-               loading="lazy"
+          <img data-src="{PhotoURL-500}" src="" alt="{PhotoAlt}"
+               width="{PhotoWidth-500}" height="{PhotoHeight-500}" loading="lazy"
                data-hires="{PhotoURL-HighRes}"
                class="{block:NotFirst}extra-img{/block:NotFirst}">
           {/block:Photos}
@@ -409,27 +408,21 @@
         {/block:Photoset}
         {/block:Posts}
       </div>
-      <div class="load-sentinel" id="sentinel">
-        <div class="load-spinner"></div>
-      </div>
+      <div class="load-sentinel" id="sentinel"><div class="load-spinner"></div></div>
     </div>
     {/block:TagPage}
 
+    <!-- ──────── Search ──────── -->
     {block:SearchPage}
-    <div class="gallery" id="gallery" data-view="grid">
+    <div class="gallery" id="gallery">
       <div class="gallery-grid" id="grid">
         {block:Posts}
         {block:Photo}
         <figure class="tile tile-grid"
                 data-lb-src="{PhotoURL-HighRes}"
-                data-lb-alt="{PhotoAlt}"
-                data-permalink="{Permalink}">
-          <img data-src="{PhotoURL-500}"
-               src=""
-               alt="{PhotoAlt}"
-               width="{PhotoWidth-500}"
-               height="{PhotoHeight-500}"
-               loading="lazy">
+                data-lb-alt="{PhotoAlt}">
+          <img data-src="{PhotoURL-500}" src="" alt="{PhotoAlt}"
+               width="{PhotoWidth-500}" height="{PhotoHeight-500}" loading="lazy">
         </figure>
         {/block:Photo}
         {/block:Posts}
@@ -449,30 +442,28 @@
     {block:PermalinkPage}
     <div class="permalink-wrap">
       {block:Posts}
-
       {block:Photo}
-      <img class="permalink-photo"
-           src="{PhotoURL-HighRes}"
-           alt="{PhotoAlt}"
-           width="{PhotoWidth-HighRes}"
-           height="{PhotoHeight-HighRes}">
+      <img class="permalink-photo" src="{PhotoURL-HighRes}" alt="{PhotoAlt}"
+           width="{PhotoWidth-HighRes}" height="{PhotoHeight-HighRes}">
       {/block:Photo}
-
       {block:Photoset}
       <div class="permalink-set">
         {block:Photos}
-        <img src="{PhotoURL-HighRes}"
-             alt="{PhotoAlt}"
-             width="{PhotoWidth-HighRes}"
-             height="{PhotoHeight-HighRes}"
-             loading="lazy">
+        <img src="{PhotoURL-HighRes}" alt="{PhotoAlt}"
+             width="{PhotoWidth-HighRes}" height="{PhotoHeight-HighRes}" loading="lazy">
         {/block:Photos}
       </div>
       {/block:Photoset}
-
       {/block:Posts}
     </div>
     {/block:PermalinkPage}
+
+    <!-- ──────── Custom pages (e.g. /travel) ──────── -->
+    {block:PagePage}
+    <div class="page-body">
+      {Body}
+    </div>
+    {/block:PagePage}
 
   </main>
 
@@ -491,11 +482,34 @@
   (function () {
     'use strict';
 
-    /* ── helpers ───────────────────────────────────────────────── */
-    var $ = function (sel, ctx) { return (ctx || document).querySelector(sel); };
-    var $$ = function (sel, ctx) { return Array.from((ctx || document).querySelectorAll(sel)); };
+    var $ = function (s, c) { return (c || document).querySelector(s); };
+    var $$ = function (s, c) { return Array.from((c || document).querySelectorAll(s)); };
 
-    /* ── view-mode (grid / list) ───────────────────────────────── */
+    /* ── Detect page type ──────────────────────────────────────── */
+    var path     = location.pathname;
+    var tagMatch = path.match(/^\/tagged\/([^/]+)/);
+    var currentTag = tagMatch ? decodeURIComponent(tagMatch[1]).toLowerCase() : null;
+    var isTripPage = currentTag && (window.TRAVEL_TAGS || []).indexOf(currentTag) >= 0;
+    var isPagePage = !!$('.page-body');
+
+    /* ── Travel: activate link + breadcrumb on trip pages ─────── */
+    if (isTripPage) {
+      var travelLink = document.getElementById('link-travel');
+      if (travelLink) travelLink.classList.add('active');
+      $$('#nav-links a').forEach(function (a) {
+        if (a !== travelLink) a.classList.remove('active');
+      });
+      var bc = document.getElementById('trip-breadcrumb');
+      if (bc) bc.classList.add('visible');
+    }
+
+    /* ── Hide view toggle on custom pages (travel index, etc.) ── */
+    if (isPagePage) {
+      var vt = document.getElementById('view-toggle');
+      if (vt) vt.style.visibility = 'hidden';
+    }
+
+    /* ── View mode (grid / list) ───────────────────────────────── */
     var gallery = document.getElementById('gallery');
     var gridEl  = document.getElementById('grid');
     var btnGrid = document.getElementById('btn-grid');
@@ -504,32 +518,27 @@
     var TILES   = { grid: 'tile-grid',    list: 'tile-list' };
 
     var savedView = 'grid';
-    try { savedView = localStorage.getItem('view') || 'grid'; } catch(e) {}
+    try { savedView = localStorage.getItem('view') || 'grid'; } catch (e) {}
 
     function setView(v, save) {
       if (!gallery || !gridEl) return;
       var other = v === 'grid' ? 'list' : 'grid';
       gridEl.classList.remove(VIEWS[other]);
       gridEl.classList.add(VIEWS[v]);
-
-      // swap tile class on all tiles
       $$('.tile', gridEl).forEach(function (t) {
         t.classList.remove(TILES[other]);
         t.classList.add(TILES[v]);
       });
-
       if (btnGrid) btnGrid.classList.toggle('active', v === 'grid');
       if (btnList) btnList.classList.toggle('active', v === 'list');
-
-      if (save) { try { localStorage.setItem('view', v); } catch(e) {} }
+      if (save) { try { localStorage.setItem('view', v); } catch (e) {} }
     }
 
     if (btnGrid) btnGrid.addEventListener('click', function () { setView('grid', true); });
     if (btnList) btnList.addEventListener('click', function () { setView('list', true); });
-
     setView(savedView, false);
 
-    /* ── lazy-load images ──────────────────────────────────────── */
+    /* ── Lazy loading ──────────────────────────────────────────── */
     function loadImg(img) {
       var src = img.getAttribute('data-src');
       if (!src || img.src === src) return;
@@ -537,26 +546,22 @@
       img.removeAttribute('data-src');
     }
 
+    var imgObs;
     if ('IntersectionObserver' in window) {
-      var imgObs = new IntersectionObserver(function (entries) {
+      imgObs = new IntersectionObserver(function (entries) {
         entries.forEach(function (e) {
           if (e.isIntersecting) { loadImg(e.target); imgObs.unobserve(e.target); }
         });
       }, { rootMargin: '600px 0px' });
-
-      function observeImgs(root) {
-        $$('img[data-src]', root || document).forEach(function (img) { imgObs.observe(img); });
-      }
-      observeImgs();
+      $$('img[data-src]').forEach(function (img) { imgObs.observe(img); });
     } else {
-      // fallback: load all
       $$('img[data-src]').forEach(loadImg);
     }
 
-    /* ── infinite scroll ────────────────────────────────────────── */
-    var sentinel  = document.getElementById('sentinel');
-    var nextLink  = document.getElementById('next-page');
-    var loading   = false;
+    /* ── Infinite scroll ───────────────────────────────────────── */
+    var sentinel = document.getElementById('sentinel');
+    var nextLink = document.getElementById('next-page');
+    var loading  = false;
 
     function fetchNext() {
       if (loading || !nextLink) return;
@@ -564,43 +569,34 @@
       if (!url) return;
       loading = true;
       if (sentinel) sentinel.classList.add('is-loading');
-
       fetch(url, { credentials: 'same-origin' })
         .then(function (r) { return r.text(); })
         .then(function (html) {
           var doc = new DOMParser().parseFromString(html, 'text/html');
           var newGrid = doc.getElementById('grid');
           var newTiles = newGrid ? $$('.tile', newGrid) : [];
+          var v = (btnGrid && btnGrid.classList.contains('active')) ? 'grid' : 'list';
           newTiles.forEach(function (t) {
             var node = document.importNode(t, true);
-            // apply current view class
-            var v = btnGrid && btnGrid.classList.contains('active') ? 'grid' : 'list';
             node.classList.remove('tile-grid', 'tile-list');
             node.classList.add(TILES[v]);
             gridEl.appendChild(node);
-            // observe new images
-            $$('img[data-src]', node).forEach(function (img) {
-              if ('imgObs' in window) { /* handled below */ }
-              loadImg(img); // fallback
-            });
-            if (typeof imgObs !== 'undefined') {
+            if (imgObs) {
               $$('img[data-src]', node).forEach(function (img) { imgObs.observe(img); });
+            } else {
+              $$('img[data-src]', node).forEach(loadImg);
             }
           });
-
-          // update lightbox pool
           lbItems = collectLbItems();
-
           var newNext = doc.getElementById('next-page');
           if (newNext && newNext.getAttribute('href')) {
             nextLink.setAttribute('href', newNext.getAttribute('href'));
           } else {
-            nextLink.removeAttribute('href');
             nextLink = null;
           }
         })
-        .catch(function () { /* silent: user can scroll again */ })
-        .finally(function () {
+        .catch(function () {})
+        .then(function () {
           loading = false;
           if (sentinel) sentinel.classList.remove('is-loading');
         });
@@ -613,7 +609,7 @@
       scrollObs.observe(sentinel);
     }
 
-    /* ── lightbox ────────────────────────────────────────────────── */
+    /* ── Lightbox ──────────────────────────────────────────────── */
     var lb      = document.getElementById('lb');
     var lbImg   = document.getElementById('lb-img');
     var lbClose = document.getElementById('lb-close');
@@ -627,25 +623,21 @@
       if (!lb) return [];
       var items = [];
       $$('.tile').forEach(function (tile) {
-        // Single photo tile
         if (tile.hasAttribute('data-lb-src')) {
           items.push({ src: tile.getAttribute('data-lb-src'), alt: tile.getAttribute('data-lb-alt') || '', tile: tile });
         }
-        // Photoset: each image with data-hires
         if (tile.hasAttribute('data-photoset')) {
           $$('img[data-hires]', tile).forEach(function (img) {
             items.push({ src: img.getAttribute('data-hires'), alt: img.alt || '', tile: tile });
           });
-          // also include the first already-loaded img in case data-hires isn't there
           if (!tile.querySelector('img[data-hires]')) {
-            var first = $('img', tile);
-            if (first) items.push({ src: first.getAttribute('data-src') || first.src, alt: first.alt, tile: tile });
+            var f = $('img', tile);
+            if (f) items.push({ src: f.getAttribute('data-src') || f.src, alt: f.alt, tile: tile });
           }
         }
       });
       return items;
     }
-
     lbItems = collectLbItems();
 
     function lbShow(i) {
@@ -656,7 +648,6 @@
       lbImg.onload = function () { lbImg.classList.remove('loading'); };
       lbImg.src = item.src;
       lbImg.alt = item.alt;
-      // preload neighbours
       [lbIndex + 1, lbIndex - 1].forEach(function (j) {
         var n = lbItems[(j + lbItems.length) % lbItems.length];
         if (n) { (new Image()).src = n.src; }
@@ -675,7 +666,7 @@
       if (lbClose) lbClose.focus();
     }
 
-    function lbClose_fn() {
+    function lbCloseFn() {
       if (!lb) return;
       lb.classList.remove('open');
       lb.setAttribute('aria-hidden', 'true');
@@ -684,30 +675,25 @@
     }
 
     if (lb) {
-      lbClose.addEventListener('click', lbClose_fn);
+      lbClose.addEventListener('click', lbCloseFn);
       lbPrev.addEventListener('click',  function () { lbShow(lbIndex - 1); });
       lbNext.addEventListener('click',  function () { lbShow(lbIndex + 1); });
-      lb.addEventListener('click', function (e) { if (e.target === lb) lbClose_fn(); });
-
-      // touch swipe
+      lb.addEventListener('click', function (e) { if (e.target === lb) lbCloseFn(); });
       var tx = null;
       lb.addEventListener('touchstart', function (e) { tx = e.touches[0].clientX; }, { passive: true });
-      lb.addEventListener('touchend',   function (e) {
+      lb.addEventListener('touchend', function (e) {
         if (tx === null) return;
         var dx = e.changedTouches[0].clientX - tx;
         if (Math.abs(dx) > 48) lbShow(lbIndex + (dx < 0 ? 1 : -1));
         tx = null;
       });
     }
-
     document.addEventListener('keydown', function (e) {
       if (!lb || !lb.classList.contains('open')) return;
-      if (e.key === 'Escape')     lbClose_fn();
+      if (e.key === 'Escape')     lbCloseFn();
       if (e.key === 'ArrowLeft')  lbShow(lbIndex - 1);
       if (e.key === 'ArrowRight') lbShow(lbIndex + 1);
     });
-
-    // click delegation: tile click → lightbox (or permalink for photosets on mobile)
     document.addEventListener('click', function (e) {
       var tile = e.target.closest('.tile');
       if (!tile || !lb) return;
@@ -715,20 +701,12 @@
       lbOpen(tile);
     });
 
-    /* ── tag-page active link highlight (client-side fallback) ─── */
-    // Tumblr's {block:TagX} detection covers most cases;
-    // this catches custom slug mismatches gracefully.
-    var path = location.pathname;
-    var tagMatch = path.match(/^\/tagged\/(.+)/);
-    if (tagMatch) {
-      var slug = tagMatch[1].toLowerCase();
+    /* ── Category tag-page active link (client-side fallback) ──── */
+    if (currentTag && !isTripPage) {
       $$('#nav-links a').forEach(function (a) {
-        var href = a.getAttribute('href') || '';
-        if (href.replace('/tagged/', '').toLowerCase() === slug) {
-          a.classList.add('active');
-        } else if (href === '/') {
-          a.classList.remove('active');
-        }
+        var href = (a.getAttribute('href') || '').replace('/tagged/', '').toLowerCase();
+        if (href === currentTag) a.classList.add('active');
+        else if (a.getAttribute('href') === '/') a.classList.remove('active');
       });
     }
 
