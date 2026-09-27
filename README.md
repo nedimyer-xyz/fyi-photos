@@ -75,6 +75,61 @@ The Travel link in the sidebar points to `/travel`, which is a Tumblr **custom p
 
 Clicking a destination card navigates to `/tagged/portugal` — the standard Tumblr tag page — so all your tagged photos appear there automatically. The sidebar shows "Travel" as active, and a "← Travel" breadcrumb appears at the top.
 
+## Posting from a folder (sync script)
+
+`sync/sync.js` posts photos from a folder on your computer to Tumblr, one photo
+per post, with no caption. It needs Node 18 or newer and nothing else.
+
+### Folder layout
+
+```
+photos/
+  portraits/
+    becky/        → tags: portraits, becky
+  t-dock/         → tags: t-dock
+  challis/        → tags: challis
+  travel/
+    mexico/       → tags: mexico  ("travel" only groups trips, it isn't a tag)
+```
+
+Each folder in a photo's path becomes a tag. For extra tags, add any of these;
+they are all combined:
+
+- **Keywords** in Lightroom, Apple Photos or Capture One (saved into the exported JPEG)
+- **Finder tags** on a Mac (color-only tags are ignored)
+- **`#tags` in the filename**, e.g. `market #becky.jpg`
+
+Tags are lowercased and use hyphens (`Film & Grain` → `film-grain`).
+
+### One-time setup
+
+1. Register an app at <https://www.tumblr.com/oauth/apps>. Any name and website
+   work. Under **OAuth2 redirect URLs** enter `http://localhost:3000/callback`.
+2. Copy `sync/.env.example` to `sync/.env` and fill in the OAuth consumer key and
+   secret, your blog name, and the path to your photos folder.
+3. Run `node sync/auth.js`, then click **Allow** in the browser tab it opens.
+
+### Everyday use
+
+```bash
+node sync/sync.js                         # preview: lists new photos and their tags
+node sync/sync.js --post --draft --limit 3  # test: saves 3 photos as Tumblr drafts
+node sync/sync.js --post                  # publish every new photo
+node sync/sync.js --retag                 # push tag changes to photos already posted
+```
+
+- The script posts oldest photos first, using each photo's capture date, so the
+  newest photos end up at the top.
+- It keeps a log in the photos folder (`.tumblr-posted.json`), so re-running only
+  posts new photos. Draft test runs use a separate log, so drafts are posted
+  again for real later. Delete test drafts on Tumblr yourself.
+- If Tumblr's daily posting limit is reached, it stops. Run the same command the
+  next day to continue.
+- A re-edited or re-exported photo counts as a new photo and gets posted again.
+- Updating tags keeps any tags you added by hand on Tumblr.
+- The preview prints the value for the theme's **Travel Trip Tags** setting,
+  built from your `travel/` folders.
+
 ## Previewing locally
 
 Tumblr template tags only resolve on Tumblr itself. A small Node script fills them
