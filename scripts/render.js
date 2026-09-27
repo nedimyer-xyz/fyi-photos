@@ -108,6 +108,7 @@ out = block(out, 'IndexPage',     pageType === 'index');
 out = block(out, 'TagPage',       pageType === 'tag');
 out = block(out, 'SearchPage',    pageType === 'search');
 out = block(out, 'PermalinkPage', pageType === 'permalink');
+out = block(out, 'PagePage',      pageType === 'page');
 
 // Pagination
 out = block(out, 'Pagination',  pageType === 'index' || pageType === 'tag');
@@ -139,6 +140,19 @@ if (pageType === 'index' || pageType === 'tag' || pageType === 'search') {
   const src = svgImg(w, h, 42);
   const single = `<img class="permalink-photo" src="${src}" alt="Lead photo" width="${w}" height="${h}">`;
   out = out.replace(/\{block:Posts\}[\s\S]*?\{\/block:Posts\}/g, single);
+} else if (pageType === 'page') {
+  // Inject sample travel page body — {Body} is replaced by Tumblr with the
+  // custom page's HTML content; simulate it with a travel album grid.
+  const travelCards = ['Mexico','Japan','Nicaragua','Italy'].map((dest, i) => {
+    const src = svgImg(800, 600, i + 20);
+    const slug = dest.toLowerCase();
+    return `<a href="/tagged/${slug}" class="travel-card">
+  <img src="${src}" alt="${dest}">
+  <span class="travel-card-label">${dest}</span>
+</a>`;
+  }).join('\n');
+  const body = `<div class="travel-grid">\n${travelCards}\n</div>`;
+  out = out.replace(/\{Body\}/g, body);
 }
 
 // Strip remaining block wrapper tags (keep inner content)
@@ -168,6 +182,8 @@ const globals = {
   CustomCSS: '',
   CopyrightYears: '2026',
   PostSummary: '',
+  PageTitle: 'Travel',
+  Body: '',
 };
 out = out.replace(/\{([A-Za-z][A-Za-z0-9_-]*)\}/g, (m, k) => {
   if (k in globals) return globals[k];
