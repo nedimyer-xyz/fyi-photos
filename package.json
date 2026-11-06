@@ -16,6 +16,7 @@
     "migrate:apply": "node migration/apply.mjs apply",
     "migrate:rollback": "node migration/apply.mjs rollback",
     "admin:dev": "node scripts/admin-dev.mjs",
+    "local": "node scripts/dev-all.mjs",
     "pull-config": "node scripts/pull-config.mjs"
   },
   "engines": {

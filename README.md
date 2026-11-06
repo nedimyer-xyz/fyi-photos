@@ -40,6 +40,7 @@ The theme sends one small first-party pageview event to `admin.fyi.photos/api/an
 - DNS: `A admin → 76.76.21.21`.
 - **Deploy:** `npx vercel deploy --prod`.
 - **Local development:** `npm run admin:dev` (http://localhost:4330). It reads `.env.local`, which `npx vercel env pull` creates. Without `BLOB_READ_WRITE_TOKEN`, data is kept in `.admin-data/`.
+- **One-command local setup:** `npm run local` starts the mock Tumblr, the admin (http://localhost:4330, local storage only) and the theme preview (http://localhost:4321). Needs `migration/data/posts.json` from `npm run export`.
 - **Testing without touching Tumblr:** run `node scripts/mock-tumblr.mjs`, then start the dev server with `TUMBLR_API=http://localhost:4399/v2 TUMBLR_WWW=http://localhost:4399`.
 
 ## Publishing
