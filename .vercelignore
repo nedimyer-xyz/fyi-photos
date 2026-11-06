@@ -1,0 +1,7 @@
+# Never upload local secrets, exports or caches
+migration/.secrets.json
+migration/data/
+preview/.cache/
+.admin-data/
+node_modules/
+.env*

@@ -1,0 +1,27 @@
+{
+  "name": "fyi-photos-theme",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "fetch-sample": "node preview/fetch-sample.mjs",
+    "preview": "node preview/server.mjs",
+    "preview:real": "node preview/server.mjs --real",
+    "auth": "node migration/auth.mjs",
+    "export": "node migration/export.mjs",
+    "tagger": "node migration/tagger/server.mjs",
+    "rename-people": "node migration/rename-people.mjs",
+    "set-cover": "node migration/set-cover.mjs",
+    "migrate:plan": "node migration/apply.mjs plan",
+    "migrate:apply": "node migration/apply.mjs apply",
+    "migrate:rollback": "node migration/apply.mjs rollback",
+    "admin:dev": "node scripts/admin-dev.mjs",
+    "pull-config": "node scripts/pull-config.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@vercel/blob": "^1.1.1"
+  }
+}

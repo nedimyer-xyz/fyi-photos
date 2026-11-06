@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>fyi.photos tagger</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<aside class="side">
+    <div class="side__top">
+        <h1>Tagger</h1>
+        <div class="progress">
+            <div class="progress__bar"><span id="progress-fill"></span></div>
+            <div id="progress-text" class="muted"></div>
+        </div>
+        <a class="preview-link" href="http://localhost:4321/" target="_blank" rel="noopener" title="Needs: npm run preview:real">Preview site with these tags ↗</a>
+    </div>
+
+    <section class="sel">
+        <div id="sel-count" class="sel__count">Nothing selected</div>
+        <div class="sel__actions">
+            <button type="button" id="btn-select-post" title="A">Select post</button>
+            <button type="button" id="btn-clear-tags" title="Backspace">Clear tags</button>
+            <button type="button" id="btn-undo" title="⌘Z">Undo</button>
+        </div>
+    </section>
+
+    <section id="groups" class="groups"></section>
+
+    <section class="filters">
+        <label>Show
+            <select id="f-status">
+                <option value="all">All posts</option>
+                <option value="unreviewed">Not reviewed</option>
+                <option value="untagged">Has untagged photos</option>
+                <option value="reviewed">Reviewed</option>
+            </select>
+        </label>
+        <label>Tag
+            <select id="f-tag"><option value="">Any</option></select>
+        </label>
+        <label>Year
+            <select id="f-year"><option value="">All</option></select>
+        </label>
+    </section>
+
+    <details class="help">
+        <summary>Shortcuts</summary>
+        <dl>
+            <dt>Click</dt><dd>select photo</dd>
+            <dt>⇧ Click</dt><dd>select range</dd>
+            <dt>⌘ Click</dt><dd>add / remove one</dd>
+            <dt>Drag</dt><dd>box-select (⇧ to add)</dd>
+            <dt>A</dt><dd>select current post</dd>
+            <dt>1–9</dt><dd>toggle a recent tag</dd>
+            <dt>⌫</dt><dd>clear tags on selection</dd>
+            <dt>R</dt><dd>mark post reviewed → next</dd>
+            <dt>J / K</dt><dd>next / previous post</dd>
+            <dt>U</dt><dd>next unreviewed post</dd>
+            <dt>Esc</dt><dd>deselect</dd>
+            <dt>⌘Z</dt><dd>undo</dd>
+        </dl>
+    </details>
+
+    <div id="save-status" class="save muted">Loading…</div>
+</aside>
+
+<main id="sheet" class="sheet"></main>
+<div id="lasso" class="lasso" hidden></div>
+<div id="toast" class="toast" hidden></div>
+
+<script src="app.js"></script>
+</body>
+</html>

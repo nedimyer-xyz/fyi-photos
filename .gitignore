@@ -1,4 +1,9 @@
-sync/.env
-sync/.tumblr-tokens.json
-photos/
-preview/
+preview/.cache/
+node_modules/
+.DS_Store
+migration/.secrets.json
+migration/data/
+.admin-data/
+.vercel/
+.env*
+.vercel

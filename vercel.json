@@ -1,0 +1,55 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "npm install --no-audit --no-fund",
+  "buildCommand": "npm test",
+  "outputDirectory": "admin",
+  "functions": {
+    "api/**/*.js": {
+      "maxDuration": 120,
+      "includeFiles": "theme.html"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/config.json",
+      "destination": "/api/public-config"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "fyi-photos-admin.vercel.app"
+        }
+      ],
+      "destination": "https://admin.fyi.photos/:path*",
+      "permanent": false
+    }
+  ]
+}

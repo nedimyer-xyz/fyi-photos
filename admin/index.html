@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>fyi.photos admin</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%23222'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+
+<div id="login" class="login" hidden>
+    <p class="login__hi">Hi Andrew <span aria-hidden="true">:)</span></p>
+    <a class="btn btn--primary" href="/api/auth/login">Login to fyi.photos</a>
+</div>
+
+<div id="app" class="app" hidden>
+    <aside class="sidebar">
+        <a class="sidebar__brand" href="#new">fyi.photos <span>Studio</span></a>
+        <nav class="tabs" aria-label="Admin">
+            <span class="nav-label">Workspace</span>
+            <a class="tab" href="#new" data-route="new"><svg class="nav-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M4 10h12"/></svg>New post</a>
+            <a class="tab" href="#tag" data-route="tag"><svg class="nav-icon" viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="m3 14 4-4 4 4 3-3 3 3"/><circle cx="12" cy="7" r="1"/></svg>Photo library</a>
+            <a class="tab" href="#analytics" data-route="analytics"><svg class="nav-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 17V9m5 8V4m5 13v-6m5 6V2"/></svg>Analytics</a>
+            <span class="nav-label">Organize</span>
+            <a class="tab" href="#people" data-route="people"><svg class="nav-icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="6" r="3"/><path d="M4 17v-2a6 6 0 0 1 12 0v2"/></svg>People</a>
+            <a class="tab" href="#places" data-route="places"><svg class="nav-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M16 8c0 5-6 10-6 10S4 13 4 8a6 6 0 0 1 12 0Z"/><circle cx="10" cy="8" r="2"/></svg>Places</a>
+            <a class="tab" href="#series" data-route="series"><svg class="nav-icon" viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="7" width="14" height="10" rx="2"/><path d="M5 4h10M7 1h6"/></svg>Series</a>
+        </nav>
+        <div class="sidebar__footer">
+            <a class="top__link" href="https://fyi.photos" target="_blank" rel="noopener">View photo site ↗</a>
+            <button type="button" class="link-btn" id="btn-logout">Log out</button>
+        </div>
+    </aside>
+    <div class="workspace">
+    <header class="top">
+        <div>
+            <h1 id="view-title">New post</h1>
+        </div>
+        <div id="theme-banner" class="banner" hidden>
+            <span>Theme update ready</span>
+            <button type="button" class="btn btn--primary btn--sm" id="btn-copy-theme">Copy theme</button>
+        </div>
+    </header>
+
+    <!-- ── Tag existing posts ─────────────────────────── -->
+    <section class="view" data-view="tag">
+        <aside class="side">
+            <h2 class="side__title">Photo details</h2>
+            <div class="progress">
+                <div class="progress__bar"><span id="progress-fill"></span></div>
+                <div id="progress-text" class="muted">Loading posts…</div>
+            </div>
+            <section class="sel">
+                <div id="tag-sel-count" class="sel__count">Nothing selected</div>
+                <div class="sel__actions">
+                    <button type="button" id="btn-select-post" title="A">Select post</button>
+                    <button type="button" id="btn-clear-tags" title="Backspace">Clear tags</button>
+                    <button type="button" id="btn-undo" title="⌘Z">Undo</button>
+                </div>
+            </section>
+            <section class="groups" id="tag-groups"></section>
+            <details class="help">
+                <summary>Shortcuts</summary>
+                <dl>
+                    <dt>Click</dt><dd>select photo</dd>
+                    <dt>⇧ Click</dt><dd>select range</dd>
+                    <dt>⌘ Click</dt><dd>add / remove one</dd>
+                    <dt>Drag</dt><dd>box-select (⇧ to add)</dd>
+                    <dt>A</dt><dd>select current post</dd>
+                    <dt>1–9</dt><dd>toggle a recent tag</dd>
+                    <dt>⌫</dt><dd>clear tags on selection</dd>
+                    <dt>R</dt><dd>mark post reviewed → next</dd>
+                    <dt>J / K</dt><dd>next / previous post</dd>
+                    <dt>U</dt><dd>next unreviewed post</dd>
+                    <dt>Esc</dt><dd>deselect</dd>
+                    <dt>⌘Z</dt><dd>undo</dd>
+                </dl>
+            </details>
+            <div id="save-status" class="save muted"></div>
+        </aside>
+        <div class="library-content">
+            <section class="filters" aria-label="Filter photo library">
+                <label>Status
+                    <select id="f-status">
+                        <option value="all">All posts</option>
+                        <option value="unreviewed">Not reviewed</option>
+                        <option value="untagged">Has untagged photos</option>
+                        <option value="reviewed">Reviewed</option>
+                    </select>
+                </label>
+                <label>Tag <select id="f-tag"><option value="">Any</option></select></label>
+                <label>Year <select id="f-year"><option value="">All</option></select></label>
+            </section>
+            <main id="sheet" class="sheet"></main>
+        </div>
+    </section>
+
+    <!-- ── New post ───────────────────────────────────── -->
+    <section class="view" data-view="new">
+        <aside class="side">
+            <h2 class="side__title">Post details</h2>
+            <section class="sel">
+                <div id="new-sel-count" class="sel__count">Nothing selected</div>
+                <div class="sel__actions">
+                    <button type="button" id="btn-new-select-all" title="A">Select all</button>
+                    <button type="button" id="btn-new-clear" title="Backspace">Clear tags</button>
+                </div>
+            </section>
+            <section class="groups" id="new-groups"></section>
+            <section class="compose">
+                <label class="compose__label" for="caption">Caption <span class="muted">(optional)</span></label>
+                <textarea id="caption" rows="3"></textarea>
+                <label class="compose__label" for="post-state">When</label>
+                <select id="post-state">
+                    <option value="published">Publish now</option>
+                    <option value="queue">Add to queue</option>
+                    <option value="draft">Save as draft</option>
+                </select>
+                <label class="compose__label" for="post-date" id="post-date-label">Post date <span class="muted">(optional, to backdate)</span></label>
+                <input type="datetime-local" id="post-date">
+                <p id="publish-note" class="muted small"></p>
+                <button type="button" class="btn btn--primary btn--block" id="btn-publish" disabled>Publish</button>
+            </section>
+        </aside>
+        <main class="sheet sheet--new" id="new-sheet">
+            <div class="drop" id="drop">
+                <button class="btn" type="button" id="btn-create-post">
+                    <svg class="drop__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V3m-5 5 5-5 5 5M4 15v5a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"/></svg>
+                    Create a post
+                </button>
+                <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple aria-label="Choose photos" hidden>
+            </div>
+            <div class="new-grid" id="new-grid"></div>
+        </main>
+    </section>
+
+    <!-- ── Lists & covers ─────────────────────────────── -->
+    <section class="view view--scroll" data-view="lists">
+        <main class="lists">
+            <section class="list-section" data-category="travel">
+                <div class="list-section__head">
+                    <h2>Places</h2>
+                    <button type="button" class="link-btn" data-add="travel">+ Add place</button>
+                </div>
+                <div class="tiles" id="tiles-travel"></div>
+            </section>
+            <section class="list-section" data-category="series">
+                <div class="list-section__head">
+                    <h2>Series</h2>
+                    <button type="button" class="link-btn" data-add="series">+ Add series</button>
+                </div>
+                <div class="tiles" id="tiles-series"></div>
+            </section>
+            <section class="list-section" data-category="people">
+                <div class="list-section__head">
+                    <h2>People</h2>
+                    <span class="muted small">Always shown A–Z on the site</span>
+                    <button type="button" class="link-btn" data-add="people">+ Add person</button>
+                </div>
+                <ul class="people-list" id="people-list"></ul>
+            </section>
+        </main>
+    </section>
+
+    <!-- ── Analytics ──────────────────────────────────── -->
+    <section class="view view--scroll" data-view="analytics">
+        <main class="analytics">
+            <div class="analytics__toolbar">
+                <div class="periods" role="group" aria-label="Analytics period">
+                    <button type="button" data-days="1">Today</button>
+                    <button type="button" data-days="7" class="is-active">7 days</button>
+                    <button type="button" data-days="30">30 days</button>
+                </div>
+                <span id="analytics-status" class="muted small"></span>
+            </div>
+            <section class="metric-grid" aria-label="Analytics summary">
+                <article class="metric"><span>Estimated visitors</span><strong id="metric-visitors">—</strong></article>
+                <article class="metric"><span>Pageviews</span><strong id="metric-pageviews">—</strong></article>
+                <article class="metric"><span>Daily average</span><strong id="metric-average">—</strong></article>
+            </section>
+            <section class="analytics-card analytics-chart">
+                <div class="analytics-card__head">
+                    <h2>Traffic</h2>
+                    <div class="chart-key"><span><i class="key-views"></i>Pageviews</span><span><i class="key-visitors"></i>Visitors</span></div>
+                </div>
+                <div id="traffic-chart" class="chart" aria-label="Traffic chart"></div>
+            </section>
+            <div class="analytics-lists">
+                <section class="analytics-card">
+                    <h2>Referral sources</h2>
+                    <ol id="analytics-referrals" class="ranked-list"></ol>
+                </section>
+                <section class="analytics-card">
+                    <h2>Countries</h2>
+                    <ol id="analytics-countries" class="ranked-list"></ol>
+                </section>
+                <section class="analytics-card">
+                    <h2>Top pages</h2>
+                    <ol id="analytics-pages" class="ranked-list"></ol>
+                </section>
+            </div>
+            <p class="analytics-note">Cookie-free estimates. No recordings or raw IP addresses. Data is deleted after 30 days.</p>
+        </main>
+    </section>
+    </div>
+</div>
+
+<div id="modal" class="modal" hidden>
+    <div class="modal__box" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="modal__head">
+            <h3 id="modal-title"></h3>
+            <button type="button" class="link-btn" id="modal-close">Close</button>
+        </div>
+        <div class="modal__body" id="modal-body"></div>
+    </div>
+</div>
+
+<div id="lasso" class="lasso" hidden></div>
+<div id="toast" class="toast" hidden></div>
+
+<script src="/app.js"></script>
+</body>
+</html>

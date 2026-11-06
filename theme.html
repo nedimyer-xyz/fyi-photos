@@ -1,716 +1,1750 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Customize panel options -->
-  <meta name="color:Accent"            content="#000000">
-  <meta name="text:Tag 1 Label"        content="Portraits">
-  <meta name="text:Tag 1 Slug"         content="portraits">
-  <meta name="text:Tag 2 Label"        content="T-Dock">
-  <meta name="text:Tag 2 Slug"         content="t-dock">
-  <meta name="text:Tag 3 Label"        content="Challis">
-  <meta name="text:Tag 3 Slug"         content="challis">
-  <!-- Comma-separated list of trip tag slugs so the theme knows which
-       tag pages belong under Travel (activates Travel link + back arrow).
-       Example: mexico,japan,nicaragua,italy -->
-  <meta name="text:Travel Trip Tags"   content="mexico,japan,nicaragua,italy">
-  <meta name="if:Use Lightbox"         content="1">
+    <title>{block:TagPage}{Tag} – {/block:TagPage}Andrew Nedimyer – Photos</title>
+    <meta name="description" content="Photos by Andrew">
 
-  <title>{Title}{block:TagPage} — #{Tag}{/block:TagPage}{block:SearchPage} — {SearchQuery}{/block:SearchPage}{block:PagePage} — {PageTitle}{/block:PagePage}</title>
+    <!-- Facebook / Open Graph -->
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="35mm photo blog">
+    <meta property="og:description" content="Photos by Andrew Nedimyer">
+    <meta property="og:url" content="https://fyi.photos/">
+    <meta property="og:site_name" content="35mm photo blog">
+    <meta property="og:image" content="https://64.media.tumblr.com/44ece9d7252b0a0b43ab4c9f44fdd3fb/5f330e134c8c97e1-b9/s1280x1920/ad2d84440773cd54004dc5ce78fccb32268815e8.jpg">
+    <meta property="og:image:width" content="1280">
+    <meta property="og:image:height" content="849">
+    <meta property="og:image:alt" content="Andrew taking a photo in a round traffic mirror">
 
-  <link rel="shortcut icon" href="{Favicon}">
-  <link rel="alternate" type="application/rss+xml" href="{RSS}">
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="https://fyi.photos/">
+    <meta name="twitter:title" content="35mm photo blog">
+    <meta name="twitter:description" content="Photos by Andrew Nedimyer">
+    <meta name="twitter:image" content="https://64.media.tumblr.com/44ece9d7252b0a0b43ab4c9f44fdd3fb/5f330e134c8c97e1-b9/s1280x1920/ad2d84440773cd54004dc5ce78fccb32268815e8.jpg">
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="shortcut icon" href="https://64.media.tumblr.com/b9bdddca1813ad9e1dda92bd99b4036e/9d08e1fcbb32212a-8c/s128x128u_c1/54fb9577bd6918908c0b1c339b1569e4ff87e723.pnj">
+    <link rel="apple-touch-icon" href="https://64.media.tumblr.com/b9bdddca1813ad9e1dda92bd99b4036e/9d08e1fcbb32212a-8c/s128x128u_c1/54fb9577bd6918908c0b1c339b1569e4ff87e723.pnj">
+    <link rel="alternate" type="application/rss+xml" href="{RSS}">
 
-  <!-- Travel trip-tag slugs, server-rendered for JS -->
-  <script>var TRAVEL_TAGS='{text:Travel Trip Tags}'.split(',').map(function(s){return s.trim().toLowerCase();});</script>
+    <!-- Restore the visitor's last feed/grid choice before first paint -->
+    <script>
+    (function () {
+        var v = 'feed';
+        // Everything always opens as a single column; other pages remember the last choice.
+        window.FYI_VIEW_KEY = /^\/(page\/\d+\/?)?$/.test(location.pathname) ? null : 'fyi-view';
+        try { if (window.FYI_VIEW_KEY && localStorage.getItem(window.FYI_VIEW_KEY) === 'grid') v = 'grid'; } catch (e) {}
+        document.documentElement.className += ' js view-' + v;
+    })();
+    </script>
 
-  <style>
-    /* ── Reset & tokens ─────────────────────────────────────────── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --nav-w: 200px;
-      --bg: #ffffff;
-      --text: #000000;
-      --muted: #b8b8b8;
-      --gap: 3px;
+    <!-- Cookie-free, first-party analytics. No recordings or raw IP storage. -->
+    <script>
+    (function () {
+        if (location.hostname !== 'fyi.photos' || navigator.webdriver || navigator.doNotTrack === '1') return;
+        var referrer = 'Direct';
+        try {
+            var source = new URL(document.referrer);
+            if (source.hostname && source.hostname !== location.hostname) referrer = source.hostname.replace(/^www\./, '');
+        } catch (e) {}
+        var body = JSON.stringify({ path: location.pathname, referrer: referrer });
+        var endpoint = 'https://admin.fyi.photos/api/analytics';
+        fetch(endpoint, { method: 'POST', body: body, credentials: 'omit', keepalive: true }).catch(function () {});
+    })();
+    </script>
+
+    <style>
+    @font-face {
+        font-family: 'StabilGrotesk-Regular';
+        src: url('https://nedimyer.xyz/fonts/StabilGrotesk-Regular.woff2') format('woff2'),
+             url('https://nedimyer.xyz/fonts/StabilGrotesk-Regular.woff') format('woff');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
     }
-    html { -webkit-text-size-adjust: 100%; }
+    @font-face {
+        font-family: 'StabilGrotesk-Bold';
+        src: url('https://nedimyer.xyz/fonts/StabilGrotesk-Bold.woff2') format('woff2'),
+             url('https://nedimyer.xyz/fonts/StabilGrotesk-Bold.woff') format('woff');
+        font-weight: bold;
+        font-style: normal;
+        font-display: swap;
+    }
+
+    /* ── Base ───────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; }
+    html {
+        font-size: 15px;
+        line-height: 1.8;
+        color: #636363;
+        background: #fff;
+        overflow-y: scroll;
+        -webkit-text-size-adjust: 100%;
+    }
     body {
-      background: var(--bg);
-      color: var(--text);
-      font: 400 13px/1.5 "Inter", -apple-system, sans-serif;
-      -webkit-font-smoothing: antialiased;
+        margin: 0;
+        font-family: 'StabilGrotesk-Regular', sans-serif;
+        line-height: 1;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
     }
-    img { display: block; max-width: 100%; height: auto; }
-    a   { color: inherit; text-decoration: none; }
-    :focus-visible { outline: 1px solid var(--text); outline-offset: 2px; }
-
-    /* ── Left sidebar (fixed) ───────────────────────────────────── */
-    .sidebar {
-      position: fixed;
-      top: 0; left: 0; bottom: 0;
-      width: var(--nav-w);
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      padding: 0 0 40px 32px;
-      z-index: 200;
-      background: var(--bg);
-    }
-    .sidebar-label {
-      position: absolute;
-      top: 36px; left: 32px;
-      font-size: 12px;
-      color: var(--muted);
-      letter-spacing: 0.01em;
-    }
-    .sidebar-name {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text);
-      margin-bottom: 14px;
-      letter-spacing: -0.01em;
-    }
-    .nav-links {
-      list-style: none;
-      margin-bottom: 22px;
-    }
-    .nav-links li + li { margin-top: 3px; }
-    .nav-links a {
-      font-size: 15px;
-      color: var(--muted);
-      transition: color .12s;
-      display: block;
-      padding: 1px 0;
-    }
-    .nav-links a:hover  { color: var(--text); }
-    .nav-links a.active { color: var(--text); }
-
-    /* view-toggle icons */
-    .view-toggle {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-    .view-toggle button {
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 2px;
-      color: var(--muted);
-      line-height: 0;
-      transition: color .12s;
-    }
-    .view-toggle button:hover  { color: var(--text); }
-    .view-toggle button.active { color: var(--text); }
-    .view-toggle svg { display: block; }
-    /* hide view toggle on pages that don't use it */
-    .no-toggle .view-toggle { visibility: hidden; }
-
-    /* ── Main content ───────────────────────────────────────────── */
-    .main { margin-left: var(--nav-w); min-height: 100vh; }
-
-    /* ── Photo grid ─────────────────────────────────────────────── */
-    .gallery-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: var(--gap);
-    }
-    .tile-grid {
-      overflow: hidden;
-      background: #f0f0f0;
-      aspect-ratio: 1 / 1;
-      cursor: pointer;
-    }
-    .tile-grid img {
-      width: 100%; height: 100%;
-      object-fit: cover;
-      transition: opacity .3s;
-    }
-    .tile-grid img[data-src]:not([src]) { opacity: 0; }
-    .tile-grid:hover img { opacity: .88; }
-    .tile-grid .extra-img { display: none; }
-
-    /* ── List / stack view ──────────────────────────────────────── */
-    .gallery-list { display: flex; flex-direction: column; gap: 2px; }
-    .tile-list { cursor: pointer; overflow: hidden; background: #f0f0f0; }
-    .tile-list img { width: 100%; height: auto; display: block; transition: opacity .3s; }
-    .tile-list img[data-src]:not([src]) { opacity: 0; }
-
-    /* ── Infinite scroll sentinel ───────────────────────────────── */
-    .load-sentinel {
-      height: 80px;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .load-spinner {
-      width: 18px; height: 18px;
-      border: 1.5px solid #ddd; border-top-color: #999;
-      border-radius: 50%;
-      animation: spin .7s linear infinite;
-      display: none;
-    }
-    .is-loading .load-spinner { display: block; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ── Travel album grid ──────────────────────────────────────── */
-    .travel-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: var(--gap);
-    }
-    @media (min-width: 900px) {
-      .travel-grid { grid-template-columns: repeat(3, 1fr); }
-    }
-    .travel-card {
-      position: relative;
-      display: block;
-      aspect-ratio: 4 / 3;
-      overflow: hidden;
-      background: #f0f0f0;
-    }
-    .travel-card img {
-      width: 100%; height: 100%;
-      object-fit: cover;
-      transition: opacity .3s;
-    }
-    .travel-card:hover img { opacity: .75; }
-    .travel-card-label {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: flex-end;
-      padding: 14px 18px;
-      background: linear-gradient(transparent 35%, rgba(0,0,0,.55));
-      color: #fff;
-      font-size: 16px;
-      font-weight: 500;
-      letter-spacing: -0.01em;
-      pointer-events: none;
+    :root { --side: max(150px, calc(20% - 60px)); }   /* left nav width */
+    html.lb-open { overflow: hidden; }
+    ::selection { background: #000; color: #fff; }
+    a { color: #0011ff; text-decoration: none; }
+    a:hover { color: #333; }
+    button { font: inherit; color: inherit; }
+    [hidden] { display: none !important; }
+    .bold { font-family: 'StabilGrotesk-Bold', sans-serif; font-weight: bold; }
+    .visually-hidden {
+        position: absolute !important; width: 1px; height: 1px; overflow: hidden;
+        clip: rect(0 0 0 0); white-space: nowrap;
     }
 
-    /* ── Trip breadcrumb (shown on /tagged/mexico etc.) ─────────── */
-    .trip-breadcrumb {
-      display: none;
-      padding: 18px 0 0 0;
-      font-size: 12px;
-      color: var(--muted);
-      letter-spacing: .04em;
-    }
-    .trip-breadcrumb.visible { display: block; }
-    .trip-breadcrumb a { color: var(--muted); }
-    .trip-breadcrumb a:hover { color: var(--text); }
+    /* Hide Tumblr's injected controls/iframes (as in the previous theme) */
+    iframe, .iframe-controls-container, .tmblr-iframe { display: none !important; }
 
-    /* ── Lightbox ───────────────────────────────────────────────── */
-    .lb {
-      position: fixed; inset: 0; z-index: 900;
-      background: rgba(0,0,0,.92);
-      display: flex; align-items: center; justify-content: center;
-      opacity: 0; visibility: hidden;
-      transition: opacity .2s, visibility 0s linear .2s;
-    }
-    .lb.open { opacity: 1; visibility: visible; transition: opacity .2s; }
-    .lb-img {
-      max-width: calc(100vw - 120px);
-      max-height: calc(100vh - 60px);
-      width: auto; height: auto;
-      object-fit: contain;
-      user-select: none;
-      transition: opacity .15s;
-    }
-    .lb-img.loading { opacity: 0; }
-    .lb-close {
-      position: absolute; top: 16px; right: 20px;
-      background: none; border: none; color: #fff;
-      font-size: 24px; line-height: 1; cursor: pointer; opacity: .6;
-    }
-    .lb-close:hover { opacity: 1; }
-    .lb-prev, .lb-next {
-      position: absolute; top: 50%; transform: translateY(-50%);
-      background: none; border: none; color: #fff;
-      font-size: 28px; cursor: pointer; padding: 16px;
-      opacity: .45; line-height: 1;
-    }
-    .lb-prev:hover, .lb-next:hover { opacity: .9; }
-    .lb-prev { left: 8px; }
-    .lb-next { right: 8px; }
-    body.lb-open { overflow: hidden; }
-
-    /* ── Permalink ──────────────────────────────────────────────── */
-    .permalink-wrap {
-      padding: 0 0 80px;
-      display: flex; flex-direction: column; align-items: center;
-    }
-    .permalink-photo { width: 100%; max-height: 92vh; object-fit: contain; }
-    .permalink-set { width: 100%; }
-    .permalink-set img { width: 100%; display: block; margin-bottom: 2px; }
-
-    /* ── Custom page (PagePage) ─────────────────────────────────── */
-    .page-body { padding: 0; }
-
-    /* ── Empty state ────────────────────────────────────────────── */
-    .empty { padding: 120px 48px; color: var(--muted); font-size: 13px; }
-
-    /* ── Mobile ─────────────────────────────────────────────────── */
-    @media (max-width: 700px) {
-      :root { --nav-w: 0px; }
-      .sidebar {
+    /* ── Sidebar ────────────────────────────────────────── */
+    .site-header {
         position: fixed;
-        top: auto; left: 0; right: 0; bottom: 0;
-        width: 100%;
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
-        padding: 12px 20px;
-        border-top: 1px solid #eee;
-      }
-      .sidebar-label { display: none; }
-      .sidebar-name  { margin-bottom: 0; font-size: 12px; }
-      .nav-links {
-        display: flex; flex-direction: row;
-        gap: 0 14px; margin-bottom: 0;
-      }
-      .nav-links li + li { margin-top: 0; }
-      .nav-links a { font-size: 13px; }
-      .main { margin-left: 0; padding-bottom: 60px; }
-      .gallery-grid { grid-template-columns: repeat(2, 1fr); }
-      .lb-img { max-width: 100vw; }
+        top: 0;
+        left: 0;
+        width: var(--side);
+        height: 100vh;
+        padding: 42px 15px 24px;
+        overflow-y: auto;
+        z-index: 10;
+        background: #fff;
     }
-    @media (max-width: 400px) {
-      .gallery-grid { grid-template-columns: repeat(2, 1fr); gap: 2px; }
-      .travel-grid  { grid-template-columns: repeat(1, 1fr); }
+    .header-desc {
+        margin: 0 0 40px;
+        font-size: 15px;
+        line-height: 30px;
+        color: #bdbdbd;
+    }
+    .header-desc a { color: #bdbdbd; }
+    .header-desc a:hover { color: #000; }
+
+    /* Desktop: menu centered vertically in the window */
+    .primary-nav {
+        position: absolute;
+        top: 50%;
+        left: 15px;
+        right: 15px;
+        transform: translateY(-50%);
+    }
+    .primary-nav__items { list-style: none; margin: 0; padding: 0; }
+    .primary-nav__item { margin: 0 0 6px; }
+    .primary-nav__link {
+        display: block;
+        margin-top: 6px;
+        color: #bdbdbd;
+        font-size: 15px;
+        line-height: 15px;
+    }
+    .primary-nav__link:hover,
+    .primary-nav__link.active { color: #000; }
+    /* Desktop: Info sits as far from the bottom as the name is from the top */
+    .site-header__info {
+        position: absolute;
+        left: 15px;
+        bottom: 42px;
+        margin: 0;
+        font-size: 15px;
+        line-height: 30px;
+    }
+    .site-header__info .primary-nav__link { display: inline; margin: 0; line-height: inherit; }
+
+    /* ── Main column ────────────────────────────────────── */
+    .main {
+        margin-left: var(--side);
+        width: calc(100% - var(--side));
+        min-height: 100vh;
+        padding-bottom: 140px;
+    }
+    .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 0 48px;
     }
 
-    {CustomCSS}
-  </style>
+    /* Context header: breadcrumbs */
+    .page-head {
+        padding-top: 42px;   /* same top offset + line-height as .header-desc so baselines align */
+        font-size: 15px;
+        line-height: 30px;
+        color: #bdbdbd;
+    }
+    .page-head:empty { display: none; }
+    .crumbs a { color: #bdbdbd; }
+    .crumbs a:hover { color: #000; }
+    .crumbs__sep { margin: 0 8px; }
+    .crumbs__current { color: #000; }
+    .page-head { position: relative; }
+
+    /* Info page: same type as the breadcrumb, aligned with the name */
+    /* 21px lines; top margin (30 - 21) / 2 keeps the first line on the name's baseline */
+    .info__text { margin: 4.5px 0 0; max-width: 380px; line-height: 21px; text-wrap: pretty; color: #000; }
+    .info__links { list-style: none; margin: 30px 0 0; padding: 0; line-height: 22px; }
+    .info a { color: #bdbdbd; }
+    .info a:hover { color: #000; }
+    .info__email {
+        position: relative;
+        display: inline-block;
+        padding: 0;
+        border: 0;
+        background: none;
+        font: inherit;
+        line-height: inherit;
+        color: #bdbdbd;
+        cursor: pointer;
+        transition: color .15s;
+    }
+    .info__email:hover,
+    .info__email.is-copied { color: #000; }
+    .info__email:focus { outline: none; }
+    .info__email svg { width: 13px; height: 13px; margin-right: 6px; vertical-align: -1px; }
+    .info__tip {
+        position: absolute;
+        left: 50%;
+        bottom: 100%;
+        transform: translate(-50%, 2px);
+        padding: 5px 8px;
+        border-radius: 4px;
+        background: #000;
+        color: #fff;
+        font-size: 12px;
+        line-height: 1;
+        white-space: nowrap;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity .15s;
+    }
+    .info__email:hover .info__tip,
+    .info__email:focus-visible .info__tip,
+    .info__email.is-copied .info__tip { opacity: 1; }
+    .info__photo.is-cycling { cursor: pointer; }
+    .info__photo { display: block; width: min(620px, 100%); margin-top: 36px; }
+    .crumbs__toggle {
+        display: inline-block;
+        padding: 0;
+        border: 0;
+        background: none;
+        font: inherit;
+        line-height: inherit;
+        cursor: pointer;
+    }
+    .crumbs__caret {
+        width: 10px;
+        height: 10px;
+        margin-left: 6px;
+        vertical-align: 1px;
+        color: #bdbdbd;
+        transition: transform .15s, color .15s;
+    }
+    .crumbs__toggle:hover .crumbs__caret,
+    .crumbs__toggle[aria-expanded="true"] .crumbs__caret { color: #000; }
+    .crumbs__toggle[aria-expanded="true"] .crumbs__caret { transform: rotate(180deg); }
+    .crumbs__toggle:focus { outline: none; }
+
+
+    /* ── Photo placeholder (pastel loading state) ───────── */
+    .ph {
+        position: relative;
+        display: block;
+        aspect-ratio: var(--r, 1.5);
+        background-color: var(--c, #ece7e1);
+        overflow: hidden;
+    }
+    .ph img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0;
+        transition: opacity .45s ease;
+    }
+    .ph.is-loaded img { opacity: 1; }
+
+    /* ── Feed view ──────────────────────────────────────── */
+    /* First photo sits 24px below the heading: cancel its 100px top margin */
+    .posts { padding-top: 0; margin-top: -76px; }
+    .post-body {
+        max-width: 1200px;
+        margin: 0 auto;
+        color: #636363;
+    }
+    .post-body .npf_row,
+    .post-body .npf_col {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    .post-body figure { margin: 0 !important; width: auto !important; }
+    .post-body .post_media_photo_anchor { display: block; pointer-events: none; }
+    .post-body .ph {
+        width: min(100%, calc(800px * var(--r, 1.5)));
+        margin: 100px auto 0;
+    }
+    .post-body p,
+    .post-body .caption {
+        max-width: 640px;
+        margin: 40px auto 0;
+        font-size: 15px;
+        line-height: 1.8;
+    }
+    .post-body p:empty { display: none; }
+
+    /* ── Grid view ──────────────────────────────────────── */
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(var(--cols, 4), 1fr);
+        gap: 20px;
+        padding-top: 48px;
+        align-items: center;
+    }
+    .grid--masonry { display: flex; align-items: flex-start; }
+    .grid__col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
+    .tile {
+        display: block;
+        width: 100%;
+        padding: 0;
+        border: 0;
+        background: none;
+        cursor: zoom-in;
+    }
+    .tile .ph img { transition: opacity .45s ease; }
+    .tile:hover .ph.is-loaded img { opacity: .82; }
+    .tile:focus, .tile:focus-visible { outline: none; }
+
+    html.view-feed .grid,
+    html.view-grid .posts { display: none; }
+
+    /* ── Landing pages (Travel / Series) ────────────────── */
+    .landing {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 40px 20px;
+        padding-top: 48px;
+    }
+    .landing--series { grid-template-columns: repeat(2, 1fr); gap: 48px 24px; }
+    .place { display: block; color: #000; }
+    .place:hover .ph.is-loaded img { opacity: .82; }
+    .place__label {
+        display: block;
+        margin-top: 12px;
+        font-size: 15px;
+        line-height: 1.4;
+        color: #000;
+    }
+    .place:hover .place__label { text-decoration: underline; }
+    body.is-shuffling #posts,
+    body.is-shuffling #grid { display: none; }
+
+    /* Pastel placeholder blocks while posts are being fetched */
+    .skeleton__feed { padding-top: 24px; }
+    .skeleton__feed .ph { width: min(100%, 1200px); margin: 100px auto 0; }
+    .skeleton__feed .ph:first-child { margin-top: 0; }
+    .skeleton--more .skeleton__feed { padding-top: 100px; }
+    .skeleton--more .skeleton__grid { padding-top: 20px; }
+    html.view-grid .skeleton__feed { display: none; }
+    body.is-info .posts,
+    body.is-info .loader { display: none !important; }
+    body.is-landing .posts,
+    body.is-landing .grid,
+    body.is-landing .loader { display: none !important; }
+
+    /* ── Infinite scroll status ─────────────────────────── */
+    .loader {
+        padding: 60px 0 0;
+        text-align: center;
+        font-size: 14px;
+        line-height: 1.8;
+        color: #bdbdbd;
+    }
+    .loader a, .loader button {
+        color: #bdbdbd;
+        background: none;
+        border: 0;
+        cursor: pointer;
+        padding: 0;
+    }
+    .loader a:hover, .loader button:hover { color: #000; }
+    html.js .loader .js-next-page { display: none; }
+
+    /* ── Bottom-right controls (people + feed/grid) ─────── */
+    .dock {
+        position: fixed;
+        right: 24px;
+        bottom: 24px;
+        z-index: 50;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .view-toggle {
+        display: flex;
+        gap: 2px;
+        padding: 4px;
+        background: rgba(255, 255, 255, .92);
+        -webkit-backdrop-filter: blur(8px);
+        backdrop-filter: blur(8px);
+        border: 1px solid #e5e5e5;
+        border-radius: 999px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, .05);
+    }
+    .view-toggle__btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        border: 0;
+        border-radius: 999px;
+        background: transparent;
+        color: #bdbdbd;
+        cursor: pointer;
+        transition: background .15s, color .15s;
+    }
+    .view-toggle__btn:hover { color: #333; }
+    .view-toggle__btn[aria-pressed="true"] { color: #000; background: #f2f2f2; }
+    .view-toggle__btn svg { width: 16px; height: 16px; display: block; }
+    .view-toggle__btn:focus-visible { outline: 2px solid #000; outline-offset: 1px; }
+
+    /* ── People picker ──────────────────────────────────── */
+    .view-toggle__btn[aria-expanded="true"],
+    .view-toggle__btn.is-filtered { color: #000; background: #f2f2f2; }
+    .people-panel {
+        position: fixed;
+        right: 24px;
+        bottom: 80px;
+        z-index: 51;
+        width: min(760px, calc(100vw - 48px));
+        max-height: calc(100vh - 120px);
+        overflow-y: auto;
+        padding: 22px 26px 24px;
+        background: #fff;
+        border: 1px solid #e5e5e5;
+        border-radius: 14px;
+        box-shadow: 0 6px 28px rgba(0, 0, 0, .07);
+        font-size: 15px;
+        line-height: 1.65;
+    }
+    .people-panel--dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: auto;
+        bottom: auto;
+        margin-top: 12px;
+        z-index: 52;
+        max-height: calc(100vh - 150px);
+    }
+    .people-panel--travel { width: min(480px, calc(100vw - 48px)); }
+    .people-panel--travel .people-panel__list { columns: 3 120px; }
+    .people-panel__all { display: inline-block; margin-bottom: 12px; color: #bdbdbd; }
+    .people-panel__list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        columns: 4 140px;
+        column-gap: 24px;
+    }
+    .people-panel__group { break-inside: avoid; padding-bottom: 10px; }
+    .people-panel__group ul { list-style: none; margin: 0; padding: 0; }
+    .people-panel__letter {
+        display: block;
+        font-size: 11px;
+        line-height: 1.8;
+        letter-spacing: .06em;
+        color: #d9d9d9;
+    }
+    .people-panel a { color: #bdbdbd; }
+    .people-panel a:hover,
+    .people-panel a.active { color: #000; }
+
+    /* ── Lightbox ───────────────────────────────────────── */
+    .lightbox {
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fff;
+        touch-action: pan-y;
+    }
+    .lb-stage { display: flex; flex-direction: column; align-items: stretch; gap: 14px; }
+    .lightbox .ph {
+        width: min(calc(100vw - 140px), calc((100vh - 150px) * var(--r, 1.5)));
+        user-select: none;
+        -webkit-user-select: none;
+    }
+    .lightbox .ph img { object-fit: contain; }
+    /* Subtle tag pills under the photo */
+    /* width:0 + min-width:100% → exactly as wide as the photo, so tags line up with its left edge */
+    .lb-tags { display: flex; flex-wrap: wrap; justify-content: flex-start; gap: 6px; min-height: 24px; width: 0; min-width: 100%; }
+    .lb-tag {
+        display: inline-block;
+        padding: 5px 10px 4px;
+        border-radius: 6px;
+        background: #f6f6f6;
+        color: #a8a8a8;
+        font-size: 12px;
+        line-height: 15px;
+        transition: background .15s, color .15s;
+    }
+    .lb-tag:hover { background: #eee; color: #000; }
+    .lb-btn {
+        position: fixed;
+        z-index: 1001;
+        padding: 20px;
+        border: 0;
+        background: transparent;
+        color: #bbb;
+        line-height: 0;
+        cursor: pointer;
+        transition: color .15s;
+    }
+    .lb-btn svg { width: 28px; height: 28px; display: block; }
+    .lb-btn:hover { color: #000; }
+    .lb-btn:focus, .lb-btn:focus-visible { outline: none; }
+    .lb-prev { left: 0; top: 50%; transform: translateY(-50%); }
+    .lb-next { right: 0; top: 50%; transform: translateY(-50%); }
+    .lb-close { top: 4px; right: 4px; }
+    .lb-close svg { width: 22px; height: 22px; }
+
+    /* ── Responsive ─────────────────────────────────────── */
+    @media (max-width: 961px) {
+        .site-header {
+            position: relative;
+            width: 100%;
+            height: auto;
+            padding: 10px 10px 0;   /* left edge matches the photos and page titles */
+        }
+        .header-desc { margin-bottom: 0; }
+        /* Phones: menu on one line — "Everything, People, Travel, Series, Info" */
+        .site-header { display: flex; flex-wrap: wrap; align-items: baseline; }
+        .header-desc { flex: 0 0 100%; }
+        .primary-nav { position: static; transform: none; margin-top: 2px; }
+        .primary-nav__items, .primary-nav__item { display: inline; margin: 0; }
+        .primary-nav .primary-nav__link { display: inline; margin: 0; line-height: 24px; }
+        .primary-nav__item::after { content: ', '; color: #bdbdbd; }
+        .site-header__info { position: static; margin: 2px 0 0 .25em; line-height: 24px; }
+        .main { margin-left: 0; width: 100%; }
+        .container { padding: 0 10px; }
+        .page-head { padding-top: 24px; }
+        .posts { padding-top: 0; margin-top: 0; }
+        .post-body .ph { margin-top: 50px; }
+        .grid { padding-top: 24px; }
+        .landing { grid-template-columns: repeat(2, 1fr); gap: 28px 12px; padding-top: 24px; }
+    }
+    @media (max-width: 700px) {
+        .landing--series { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 900px) {
+        .grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .grid__col { gap: 12px; }
+    }
+    @media (max-width: 961px) {
+        .skeleton__feed { padding-top: 0; }
+        .skeleton__feed .ph { margin-top: 50px; }
+        .skeleton--more .skeleton__feed { padding-top: 50px; }
+        .skeleton--more .skeleton__grid { padding-top: 12px; }
+    }
+    @media (max-width: 700px) {
+        /* Phones: slightly larger name, menu and info text */
+        .header-desc { font-size: 17px; }
+        .page-head { font-size: 17px; }
+        /* Phones: just the name/place, without "People /" or "Travel /" */
+        .crumbs__parent, .crumbs__sep { display: none; }
+        .primary-nav__link { font-size: 17px; }
+        .primary-nav__item::after { font-size: 17px; }
+        .site-header__info { font-size: 17px; }
+        .info__text { margin-top: 0; font-size: 17px; line-height: 24px; }
+        .info__links { font-size: 17px; line-height: 27px; }
+        .info__email svg { width: 14px; height: 14px; }
+
+        .dock { right: auto; left: 50%; bottom: 16px; transform: translateX(-50%); }
+        .people-panel { right: 16px; bottom: 72px; width: calc(100vw - 32px); }
+        .people-panel__list { columns: 2; }
+        .people-panel--dropdown { left: 0; right: 0; bottom: auto; width: auto; }
+        .lb-prev, .lb-next { display: none; }
+        .lightbox .ph { width: min(96vw, calc((100vh - 70px) * var(--r, 1.5))); cursor: pointer; -webkit-tap-highlight-color: transparent; }
+    }
+
+    /* Guard against Tumblr's injected NPF styles (flex figures, image sizing). */
+    .post-body figure.tmblr-full,
+    .post-body .post_media_photo_anchor { display: block !important; width: auto !important; max-width: none !important; }
+    .ph img { width: 100% !important; height: 100% !important; max-width: none !important; max-height: none !important; margin: 0 !important; }
+
+    .tmblr-alt-text-helper { display: none !important; }
+
+    /* Guard against leftover Custom CSS from the old theme saved in Tumblr. */
+    .site-header { border: 0 !important; float: none !important; }
+    .main { float: none !important; }
+    .primary-nav__link { float: none !important; width: auto !important; margin-left: 0 !important; margin-right: 0 !important; }
+    </style>
 </head>
 
-<body>
+<body class="{block:IndexPage}index-page{/block:IndexPage} {block:PermalinkPage}permalink-page{/block:PermalinkPage} {block:TagPage}tag-page{/block:TagPage} {block:SearchPage}search-page{/block:SearchPage} {block:DayPage}day-page{/block:DayPage}" data-tag="{block:TagPage}{Tag}{/block:TagPage}">
 
-  <!-- ═══════════════════════ SIDEBAR ═══════════════════════════ -->
-  <nav class="sidebar" aria-label="Site navigation">
-    <span class="sidebar-label" aria-hidden="true">✦ Photos</span>
+    <header role="banner" class="site-header">
+        <p class="header-desc"><a href="/">Andrew Nedimyer</a></p>
 
-    <div>
-      <p class="sidebar-name">Andrew Nedimyer</p>
+        <nav class="primary-nav" aria-label="Primary">
+            <ul class="primary-nav__items">
+                <li class="primary-nav__item"><a href="/" class="primary-nav__link" data-section="everything">Everything</a></li>
+                <li class="primary-nav__item"><a href="/tagged/people" class="primary-nav__link" data-section="people">People</a></li>
+                <li class="primary-nav__item"><a href="/tagged/travel" class="primary-nav__link" data-section="travel">Travel</a></li>
+                <li class="primary-nav__item"><a href="/tagged/series" class="primary-nav__link" data-section="series">Series</a></li>
+            </ul>
+        </nav>
+        <p class="site-header__info"><a href="/info" class="primary-nav__link" data-section="info">Info</a></p>
+    </header>
 
-      <ul class="nav-links" id="nav-links">
-        <li>
-          <a href="/"
-             class="{block:IndexPage}active{/block:IndexPage}{block:SearchPage}active{/block:SearchPage}"
-             id="link-everything">Everything</a>
-        </li>
-        <li>
-          <a href="/tagged/{text:Tag 1 Slug}"
-             class="{block:TagPage}{block:Tag1}active{/block:Tag1}{/block:TagPage}"
-             id="link-tag1">{text:Tag 1 Label}</a>
-        </li>
-        <li>
-          <a href="/tagged/{text:Tag 2 Slug}"
-             class="{block:TagPage}{block:Tag2}active{/block:Tag2}{/block:TagPage}"
-             id="link-tag2">{text:Tag 2 Label}</a>
-        </li>
-        <li>
-          <a href="/tagged/{text:Tag 3 Slug}"
-             class="{block:TagPage}{block:Tag3}active{/block:Tag3}{/block:TagPage}"
-             id="link-tag3">{text:Tag 3 Label}</a>
-        </li>
-        <li>
-          <a href="/travel"
-             class="{block:PagePage}active{/block:PagePage}"
-             id="link-travel">Travel</a>
-        </li>
-      </ul>
+    <main role="main" class="main" id="main">
+        <div class="container">
+            <div class="page-head" id="page-head"></div>
+            <div class="landing" id="landing" hidden></div>
 
-      <!-- Grid / List toggle (hidden on travel index & custom pages) -->
-      <div class="view-toggle" id="view-toggle" role="group" aria-label="View">
-        <button id="btn-list" type="button" aria-label="List view" title="List">
-          <svg width="22" height="16" viewBox="0 0 22 16" fill="none">
-            <rect x="0" y="0"  width="22" height="7"  fill="currentColor" rx="1"/>
-            <rect x="0" y="9"  width="22" height="7"  fill="currentColor" rx="1"/>
-          </svg>
+            <div class="posts" id="posts">
+                {block:Posts}
+                <article class="post js-post" id="post-{PostID}" data-ts="{Timestamp}">
+                    <div class="post-body">
+                        {block:Text}<template class="js-body">{Body}</template>{/block:Text}
+                        {block:Photo}<template class="js-body"><figure class="tmblr-full"><a class="post_media_photo_anchor" data-big-photo="{PhotoURL-HighRes}" data-big-photo-width="{PhotoWidth-HighRes}" data-big-photo-height="{PhotoHeight-HighRes}"><img src="{PhotoURL-HighRes}" alt="{PhotoAlt}"></a></figure>{block:Caption}<div class="caption">{Caption}</div>{/block:Caption}</template>{/block:Photo}
+                        {block:Photoset}<template class="js-body">{block:Photos}<figure class="tmblr-full"><a class="post_media_photo_anchor" data-big-photo="{PhotoURL-HighRes}" data-big-photo-width="{PhotoWidth-HighRes}" data-big-photo-height="{PhotoHeight-HighRes}"><img src="{PhotoURL-HighRes}" alt="{PhotoAlt}"></a></figure>{/block:Photos}{block:Caption}<div class="caption">{Caption}</div>{/block:Caption}</template>{/block:Photoset}
+                    </div>
+                </article>
+                {/block:Posts}
+            </div>
+
+            <div class="grid" id="grid" aria-label="Photo grid"></div>
+
+            <div class="loader" id="loader">
+                {block:Pagination}{block:NextPage}<a class="js-next-page" href="{NextPage}">More photos</a>{/block:NextPage}{/block:Pagination}
+            </div>
+
+            <noscript><p class="loader">Please enable JavaScript to view the photos.</p></noscript>
+        </div>
+    </main>
+
+    <div class="dock">
+        <div class="view-toggle" id="people-toggle" hidden>
+            <button type="button" class="view-toggle__btn" id="people-btn" aria-expanded="false" aria-controls="people-panel" title="Filter by person">
+                <span class="visually-hidden">Filter by person</span>
+                <svg viewBox="0 0 18 18" aria-hidden="true">
+                    <circle cx="9" cy="5.5" r="3.5" fill="currentColor"/>
+                    <path d="M2 16.5c0-3.6 3.1-6 7-6s7 2.4 7 6z" fill="currentColor"/>
+                </svg>
+            </button>
+        </div>
+        <div class="view-toggle" id="view-toggle" role="group" aria-label="Layout" hidden>
+            <button type="button" class="view-toggle__btn" data-view="feed" aria-pressed="false" title="Feed view">
+                <span class="visually-hidden">Feed view</span>
+                <svg viewBox="0 0 18 18" aria-hidden="true"><rect x="2" y="4" width="14" height="10" rx="1" fill="currentColor"/></svg>
+            </button>
+            <button type="button" class="view-toggle__btn" data-view="grid" aria-pressed="false" title="Grid view">
+                <span class="visually-hidden">Grid view</span>
+                <svg viewBox="0 0 18 18" aria-hidden="true">
+                    <rect x="2" y="2" width="6" height="6" rx="1" fill="currentColor"/>
+                    <rect x="10" y="2" width="6" height="6" rx="1" fill="currentColor"/>
+                    <rect x="2" y="10" width="6" height="6" rx="1" fill="currentColor"/>
+                    <rect x="10" y="10" width="6" height="6" rx="1" fill="currentColor"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <nav class="people-panel" id="people-panel" aria-label="People" hidden></nav>
+
+    <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer" hidden>
+        <button type="button" class="lb-btn lb-close" aria-label="Close">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
         </button>
-        <button id="btn-grid" type="button" aria-label="Grid view" title="Grid">
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-            <rect x="0" y="0"  width="8" height="8"  fill="currentColor" rx="1"/>
-            <rect x="10" y="0" width="8" height="8"  fill="currentColor" rx="1"/>
-            <rect x="0" y="10" width="8" height="8"  fill="currentColor" rx="1"/>
-            <rect x="10" y="10" width="8" height="8" fill="currentColor" rx="1"/>
-          </svg>
+        <button type="button" class="lb-btn lb-prev" aria-label="Previous photo">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4l-8 8 8 8" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
-      </div>
+        <div class="lb-stage">
+            <span class="ph lb-ph"></span>
+            <div class="lb-tags"></div>
+        </div>
+        <button type="button" class="lb-btn lb-next" aria-label="Next photo">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4l8 8-8 8" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
     </div>
-  </nav>
 
-  <!-- ═══════════════════════ MAIN ══════════════════════════════ -->
-  <main class="main">
+    <script>
+    (function () {
+        'use strict';
 
-    <!-- ──────── Index ──────── -->
-    {block:IndexPage}
-    <div class="gallery" id="gallery">
-      <div class="gallery-grid" id="grid">
-        {block:Posts}
-        {block:Photo}
-        <figure class="tile tile-grid"
-                data-lb-src="{PhotoURL-HighRes}"
-                data-lb-alt="{PhotoAlt}">
-          <img data-src="{PhotoURL-500}" src="" alt="{PhotoAlt}"
-               width="{PhotoWidth-500}" height="{PhotoHeight-500}" loading="lazy">
-        </figure>
-        {/block:Photo}
-        {block:Photoset}
-        <figure class="tile tile-grid" data-photoset="1">
-          {block:Photos}
-          <img data-src="{PhotoURL-500}" src="" alt="{PhotoAlt}"
-               width="{PhotoWidth-500}" height="{PhotoHeight-500}" loading="lazy"
-               data-hires="{PhotoURL-HighRes}"
-               class="{block:NotFirst}extra-img{/block:NotFirst}">
-          {/block:Photos}
-        </figure>
-        {/block:Photoset}
-        {/block:Posts}
-      </div>
-      <div class="load-sentinel" id="sentinel"><div class="load-spinner"></div></div>
-    </div>
-    {/block:IndexPage}
+        /* ════════════════════════════════════════════════════════
+           CONFIG — edit these lists to add people, places, series.
+           tag:   the Tumblr tag (as used in /tagged/<tag>)
+           label: what visitors see
+           cover: image URL for the landing-page tile ('' = pastel tile)
+           ════════════════════════════════════════════════════════ */
+        /* Info page (/info). Create an empty page at /info in Tumblr; this fills it. */
+        var INFO = {
+            text: 'Product designer in Seattle, keeping a long-running film diary of friends and everyday life.',
+            email: 'nedimyer.andrew@gmail.com',
+            instagram: 'andrewnedimyer',
+            website: 'nedimyer.xyz',
+            selfTag: 'andrew-nedimyer',   // clicking the photo cycles through photos with this tag
+            photo: 'https://64.media.tumblr.com/44ece9d7252b0a0b43ab4c9f44fdd3fb/5f330e134c8c97e1-b9/s1280x1920/ad2d84440773cd54004dc5ce78fccb32268815e8.jpg'
+        };
 
-    <!-- ──────── Tag pages (category AND individual trips) ──────── -->
-    {block:TagPage}
-    <div class="gallery" id="gallery">
-      <!-- Breadcrumb — shown by JS when on a trip tag (e.g. /tagged/mexico) -->
-      <div class="trip-breadcrumb" id="trip-breadcrumb">
-        <a href="/travel">← Travel</a>
-      </div>
-      <div class="gallery-grid" id="grid">
-        {block:Posts}
-        {block:Photo}
-        <figure class="tile tile-grid"
-                data-lb-src="{PhotoURL-HighRes}"
-                data-lb-alt="{PhotoAlt}">
-          <img data-src="{PhotoURL-500}" src="" alt="{PhotoAlt}"
-               width="{PhotoWidth-500}" height="{PhotoHeight-500}" loading="lazy">
-        </figure>
-        {/block:Photo}
-        {block:Photoset}
-        <figure class="tile tile-grid" data-photoset="1">
-          {block:Photos}
-          <img data-src="{PhotoURL-500}" src="" alt="{PhotoAlt}"
-               width="{PhotoWidth-500}" height="{PhotoHeight-500}" loading="lazy"
-               data-hires="{PhotoURL-HighRes}"
-               class="{block:NotFirst}extra-img{/block:NotFirst}">
-          {/block:Photos}
-        </figure>
-        {/block:Photoset}
-        {/block:Posts}
-      </div>
-      <div class="load-sentinel" id="sentinel"><div class="load-spinner"></div></div>
-    </div>
-    {/block:TagPage}
+        var CONFIG = {
+            people: [
+                { tag: 'bucky-armbruster',   label: 'Bucky Armbruster' },
+                { tag: 'alaa-mendili',       label: 'Alaa Mendili' },
+                { tag: 'cl-young',           label: 'CL Young' },
+                { tag: 'peter-ward',         label: 'Peter Ward' },
+                { tag: 'camille-durand',     label: 'Camille Durand' },
+                { tag: 'jillian-gauld',      label: 'Jillian Gauld' },
+                { tag: 'joe-rudko',          label: 'Joe Rudko' },
+                { tag: 'bart-kaufman',       label: 'Bart Kaufman' },
+                { tag: 'ann-deotte-kaufman', label: 'Ann Deotte Kaufman' },
+                { tag: 'marc-salverda',      label: 'Marc Salverda' },
+                { tag: 'goose',              label: 'Goose' },
+                { tag: 'senna-beck-sharma',  label: 'Senna Beck-Sharma' },
+                { tag: 'hilary-beck',        label: 'Hilary Beck' },
+                { tag: 'thaz',               label: 'Thaz' },
+                { tag: 'kate-bailey',        label: 'Kate Bailey' },
+                { tag: 'neil-ferron',        label: 'Neil Ferron' },
+                { tag: 'stacey-rozich',      label: 'Stacey Rozich' },
+                { tag: 'amy-phung',          label: 'Amy Phung' },
+                { tag: 'beau-baden',         label: 'Beau Baden' },
+                { tag: 'tim-hayden',         label: 'Tim Hayden' },
+                { tag: 'joe-lambert',        label: 'Joe Lambert' },
+                { tag: 'clara-wilder',       label: 'Clara Wilder' },
+                { tag: 'rayho-osullivan',    label: 'Rayho O\'Sullivan' },
+                { tag: 'becca-fuhrman',      label: 'Becca Fuhrman' },
+                { tag: 'aaron-bloom',        label: 'Aaron Bloom' },
+                { tag: 'selena-rodriguez',   label: 'Selena Rodriguez' },
+                { tag: 'aidan-fitzgerald',   label: 'Aidan Fitzgerald' },
+                { tag: 'andrew-houle',       label: 'Andrew Houle' },
+                { tag: 'vik-sharma',         label: 'Vik Sharma' },
+                { tag: 'griffin-gass',       label: 'Griffin Gass' },
+                { tag: 'dane-nomellini',     label: 'Dane Nomellini' },
+                { tag: 'chioke',             label: 'Chioke' },
+                { tag: 'josie-bloom',        label: 'Josie Bloom' },
+                { tag: 'rachel-wheatley',    label: 'Rachel Wheatley' },
+                { tag: 'david-baden',        label: 'David Baden' },
+                { tag: 'barry-sevig',        label: 'Barry Sevig' },
+                { tag: 'kim-hoppe',          label: 'Kim Hoppe' },
+                { tag: 'wes-ellis',          label: 'Wes Ellis' },
+                { tag: 'ivan-ly',            label: 'Ivan Ly' },
+                { tag: 'talon',              label: 'Talon' },
+                { tag: 'andrew-nedimyer',    label: 'Andrew Nedimyer' },
+                { tag: 'jessa-bloom',        label: 'Jessa Bloom' },
+                { tag: 'dinah-dimalanta',    label: 'Dinah Dimalanta' },
+                { tag: 'adwoa-aboah',        label: 'Adwoa Aboah' },
+                { tag: 'lauren-segal',       label: 'Lauren Segal' },
+                { tag: 'nadim-damluji',      label: 'Nadim Damluji' },
+                { tag: 'laura-cariaso',      label: 'Laura Cariaso' },
+                { tag: 'van-ly',             label: 'Van Ly' },
+                { tag: 'ben-lindbloom',      label: 'Ben Lindbloom' },
+                { tag: 'maddie-eiche',       label: 'Maddie Eiche' },
+                { tag: 'elaine-han',         label: 'Elaine Han' },
+                { tag: 'reva-keller',        label: 'Reva Keller' },
+                { tag: 'sam-macon',          label: 'Sam Macon' },
+                { tag: 'daniel-wheatley',    label: 'Daniel Wheatley' },
+                { tag: 'fluff',              label: 'Fluff' },
+                { tag: 'buster-armbruster',  label: 'Buster Armbruster' },
+                { tag: 'lacy-kuhn',          label: 'Lacy Kuhn' },
+                { tag: 'deb-kahn',           label: 'Deb Kahn' },
+                { tag: 'dpayne',             label: 'DPayne' },
+                { tag: 'jason-nedimyer',     label: 'Jason Nedimyer' },
+                { tag: 'nana',               label: 'Nana' },
+                { tag: 'dad',                label: 'Dad' },
+                { tag: 'kyle-johnson',       label: 'Kyle Johnson' },
+                { tag: 'anna-perez',         label: 'Anna Perez' },
+                { tag: 'vicki-armbruster',   label: 'Vicki Armbruster' },
+                { tag: 'alex-cooper',        label: 'Alex Cooper' },
+                { tag: 'ben-chaykin',        label: 'Ben Chaykin' },
+                { tag: 'kyle-hargus',        label: 'Kyle Hargus' },
+                { tag: 'sarah-freeman',      label: 'Sarah Freeman' },
+                { tag: 'kate-harmer',        label: 'Kate Harmer' },
+                { tag: 'david-mikula',       label: 'David Mikula' },
+                { tag: 'sachi-kuwabata',     label: 'Sachi Kuwabata' },
+                { tag: 'ryan-oconnor',       label: 'Ryan O\'Connor' },
+                { tag: 'jack-moran',         label: 'Jack Moran' },
+                { tag: 'danny-hanlon',       label: 'Danny Hanlon' },
+                { tag: 'megan-bailey',       label: 'Megan Bailey' },
+                { tag: 'andrew-waits',       label: 'Andrew Waits' },
+                { tag: 'mark-wetzler',       label: 'Mark Wetzler' },
+                { tag: 'chantal-anderson',   label: 'Chantal Anderson' },
+                { tag: 'glenn-newcomer',     label: 'Glenn Newcomer' },
+                { tag: 'theresa-crim',       label: 'Theresa Crim' },
+                { tag: 'matt-engebretson',   label: 'Matt Engebretson' },
+                { tag: 'nas',                label: 'Nas' },
+                { tag: 'brandon-rapert',     label: 'Brandon Rapert' },
+                { tag: 'tom-bauer',          label: 'Tom Bauer' },
+                { tag: 'hayley-young',       label: 'Hayley Young' },
+                { tag: 'james-nedimyer',     label: 'James Nedimyer' },
+                { tag: 'mary-nedimyer',      label: 'Mary Nedimyer' },
+                { tag: 'emily-nedimyer',     label: 'Emily Nedimyer' },
+                { tag: 'elodie-nedimyer',    label: 'Elodie Nedimyer' },
+                { tag: 'michael-madrid',     label: 'Michael Madrid' },
+                { tag: 'karl-ringman',       label: 'Karl Ringman' },
+                { tag: 'demetre-arges',      label: 'Demetre Arges' },
+                { tag: 'drew-hamlet',        label: 'Drew Hamlet' },
+                { tag: 'spencer-shores',     label: 'Spencer Shores' },
+                { tag: 'chelsey-scheffe',    label: 'Chelsey Scheffe' },
+                { tag: 'wyatt-carroll',      label: 'Wyatt Carroll' },
+                { tag: 'sterling-wright',    label: 'Sterling Wright' },
+                { tag: 'chloe-scheffe',      label: 'Chloe Scheffe' },
+                { tag: 'anya-miller-berg',   label: 'Anya Miller Berg' },
+                { tag: 'david-little',       label: 'David Little' },
+                { tag: 'daniel-lint',        label: 'Daniel Lint' },
+                { tag: 'katie-rankin',       label: 'Katie Rankin' }
+            ],
+            travel: [
+                { tag: 'dolomites',    label: 'Dolomites',    cover: 'https://64.media.tumblr.com/2db2a9999a8953ca4e279ff23102b442/8f3d2aade4dec4af-74/s1280x1920/934a74eb8ae020512eaca8dccfedc41083d0cc09.jpg' },
+                { tag: 'japan',        label: 'Japan',        cover: 'https://64.media.tumblr.com/cbecec50073e07daedb1fbdf35338bcd/084f1110465a5782-26/s1280x1920/8482e791d91c7132e31297173c3901b11b3aa7c9.jpg' },
+                { tag: 'italy',        label: 'Italy',        cover: 'https://64.media.tumblr.com/e09c01a6711056e3626f986a1894b17d/9b3a17b2a0a192b8-eb/s1280x1920/49bdb033260b6b3f98b7d5399d0df5f3a337e4ae.jpg' },
+                { tag: 'neah-bay',     label: 'Neah Bay',     cover: 'https://64.media.tumblr.com/58df54534f3c7006153576233dfbc093/e85d400bc5192783-08/s1280x1920/5971ca902bac1898e42e5123901d100943ba1cd8.jpg' },
+                { tag: 'mexico',       label: 'Mexico',       cover: 'https://64.media.tumblr.com/02a5adb311e189ef3fb6c2ca83e140da/8f8f86c4d2976c3b-37/s1280x1920/8e90ce5481663decfe0ebb638ef89d58a183ee1a.jpg' },
+                { tag: 'thailand',     label: 'Thailand',     cover: 'https://64.media.tumblr.com/aa396ed7aa2021396baf342dd3b27c86/de9a754a4bc79a16-7f/s1280x1920/8d229c517911abddd4d9198e1369cd3c0fac4b85.jpg' },
+                { tag: 'spain',        label: 'Spain',        cover: 'https://64.media.tumblr.com/47ff86caebd4d8a6b44cd414a18a7f66/051354a64fd9f277-82/s1280x1920/faeda72dc90b6b1eab919b0320a667d8806ccf1b.jpg' },
+                { tag: 'backpacking',  label: 'Backpacking',  cover: 'https://64.media.tumblr.com/937d8682894ca69579318607e58b21bf/0265c2d6f17490d2-be/s1280x1920/d68d456069c0940f2ab9e76f9c709a970430f86c.jpg' },
+                { tag: 'bikepacking',  label: 'Bikepacking',  cover: 'https://64.media.tumblr.com/16fab98756993fbbaa53d6e4818b2ac7/85f7c11ac642024b-41/s1280x1920/1311f211800e69813318fcf6f222ee31a6a13733.jpg' },
+                { tag: 'florida',      label: 'Florida',      cover: 'https://64.media.tumblr.com/4d35f0d0c38333df83d02078746c5a47/76ce030ae0fe0d49-ed/s1280x1920/c65f6203b173569bb9c15f797fd9568c4f12ae52.jpg' },
+                { tag: 'nicaragua',    label: 'Nicaragua',    cover: 'https://64.media.tumblr.com/da9cfb51fe02b71a2dcd5f7c756f9ae4/dc156c537edd085c-b6/s1280x1920/1003d22a11abb35ecfe8f82c30c0c333f9f56741.jpg' },
+                { tag: 'belize',       label: 'Belize',       cover: 'https://64.media.tumblr.com/8faf1316666d4c3c87adf6a0f3597957/411c241d84a0775b-6d/s1280x1920/4d461a537a219cfe3fcb7d4ad0aee472dec9aaa7.jpg' },
+                { tag: 'palm-springs', label: 'Palm Springs', cover: 'https://64.media.tumblr.com/ebd1291c39e8f0f50fd329396aba0825/c0e8b53b36c0d704-f6/s1280x1920/cf8f4347ffbc93840761421b5fb7e2597382f6fa.jpg' },
+                { tag: 'costa-rica',   label: 'Costa Rica',   cover: 'https://64.media.tumblr.com/c66a144e2c4c3b1cef2c36541f2d58c3/46a6e4358807e83e-4d/s1280x1920/3b963bed6dacbbf8b69b29ec43fbcd332a9b3161.jpg' },
+                { tag: 'vietnam',      label: 'Vietnam',      cover: 'https://64.media.tumblr.com/dc4e22e64a8ff778617a304b3e741daa/18c88d7a83e33357-71/s1280x1920/f65f9a62a3ea265c764fc413ea387c5d6d02801a.jpg' },
+                { tag: 'martinique',   label: 'Martinique',   cover: 'https://64.media.tumblr.com/24863b44beb29d95405701bff8459334/5cedf294ccf4bc09-3e/s1280x1920/640c768569f3fa03c8eea288f7bc875956b6ae87.jpg' }
+            ],
+            series: [
+                { tag: 't-dock',            label: 'T-Dock',            cover: 'https://64.media.tumblr.com/fb3c2a3e1a747b4d0a7db51a216fecd0/0916f5ae40697513-58/s1280x1920/49bda7252ceb8012c05e6f840f8e73ec2b4cf7da.jpg' },
+                { tag: 'pearl',             label: 'pearl.',            cover: 'https://64.media.tumblr.com/dfb4efe49908aba37d9f34529a70819a/fdaeb6c1d4b847cd-4b/s1280x1920/9abafc51c006dd2b7a60afa186398477fb8d3cba.jpg' },
+                { tag: 'glorious-internet', label: 'Glorious Internet', cover: 'https://64.media.tumblr.com/6a2c7ea6d3812dcc00d7332997a2c18d/9770b4cd58348404-74/s1280x1920/41adab85443c13e10d869c3aea5941b1eb22cb09.jpg' },
+                { tag: 'challis',           label: 'Challis',           cover: 'https://64.media.tumblr.com/ea57eb4d4673ae4e86994797c1e2e1cb/08a2f07a5b57930d-b7/s1280x1920/c6176224899aa26be7ef9642987f283276cf1ce6.jpg' }
+            ]
+        };
 
-    <!-- ──────── Search ──────── -->
-    {block:SearchPage}
-    <div class="gallery" id="gallery">
-      <div class="gallery-grid" id="grid">
-        {block:Posts}
-        {block:Photo}
-        <figure class="tile tile-grid"
-                data-lb-src="{PhotoURL-HighRes}"
-                data-lb-alt="{PhotoAlt}">
-          <img data-src="{PhotoURL-500}" src="" alt="{PhotoAlt}"
-               width="{PhotoWidth-500}" height="{PhotoHeight-500}" loading="lazy">
-        </figure>
-        {/block:Photo}
-        {/block:Posts}
-        {block:NoSearchResults}
-        <div class="empty">No results for "{SearchQuery}".</div>
-        {/block:NoSearchResults}
-      </div>
-    </div>
-    {/block:SearchPage}
+        /* Muted pastel loading colors */
+        var PALETTE = [
+            '#e9dfd3', '#dde5d8', '#d8e2e9', '#e7dae3', '#efe6d2',
+            '#d6e6e1', '#ebdad5', '#dedceb', '#e4e4d4', '#d5dfea'
+        ];
 
-    <!-- hidden next-page link consumed by JS -->
-    {block:Pagination}
-    {block:NextPage}<a href="{NextPage}" id="next-page" style="display:none" rel="next"></a>{/block:NextPage}
-    {/block:Pagination}
+        var root     = document.documentElement;
+        var body     = document.body;
+        var feed     = document.getElementById('posts');
+        var grid     = document.getElementById('grid');
+        var landing  = document.getElementById('landing');
+        var pageHead = document.getElementById('page-head');
+        var loader   = document.getElementById('loader');
+        var toggle   = document.getElementById('view-toggle');
+        var lb       = document.getElementById('lightbox');
+        var lbPh     = lb.querySelector('.lb-ph');
+        var lbPrev   = lb.querySelector('.lb-prev');
+        var lbNext   = lb.querySelector('.lb-next');
+        var lbClose  = lb.querySelector('.lb-close');
 
-    <!-- ──────── Permalink ──────── -->
-    {block:PermalinkPage}
-    <div class="permalink-wrap">
-      {block:Posts}
-      {block:Photo}
-      <img class="permalink-photo" src="{PhotoURL-HighRes}" alt="{PhotoAlt}"
-           width="{PhotoWidth-HighRes}" height="{PhotoHeight-HighRes}">
-      {/block:Photo}
-      {block:Photoset}
-      <div class="permalink-set">
-        {block:Photos}
-        <img src="{PhotoURL-HighRes}" alt="{PhotoAlt}"
-             width="{PhotoWidth-HighRes}" height="{PhotoHeight-HighRes}" loading="lazy">
-        {/block:Photos}
-      </div>
-      {/block:Photoset}
-      {/block:Posts}
-    </div>
-    {/block:PermalinkPage}
+        var images = [];   // every photo in the current stream, in order
+        var seen   = {};   // post ids already on the page
 
-    <!-- ──────── Custom pages (e.g. /travel) ──────── -->
-    {block:PagePage}
-    <div class="page-body">
-      {Body}
-    </div>
-    {/block:PagePage}
+        /* ── Helpers ──────────────────────────────────────── */
+        function norm(t) {
+            var s = String(t || '');
+            try { s = decodeURIComponent(s.replace(/\+/g, ' ')); } catch (e) {}
+            return s.toLowerCase().trim().replace(/[\s_]+/g, '-');
+        }
+        function find(list, tag) {
+            for (var i = 0; i < list.length; i++) if (norm(list[i].tag) === tag) return list[i];
+            return null;
+        }
+        function pastel(key) {
+            var h = 0;
+            for (var i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) | 0;
+            return PALETTE[Math.abs(h) % PALETTE.length];
+        }
+        function el(tag, cls, text) {
+            var n = document.createElement(tag);
+            if (cls) n.className = cls;
+            if (text != null) n.textContent = text;
+            return n;
+        }
+        function tagUrl(tag) { return '/tagged/' + encodeURIComponent(tag); }
+        // Drop Tumblr's cropped sizes (e.g. s75x75_c1) so only full-frame renditions are used.
+        function cleanSrcset(srcset) {
+            if (!srcset) return '';
+            return srcset.split(',').map(function (s) { return s.trim(); })
+                .filter(function (s) { return s && !/_c1\//.test(s); })
+                .join(', ');
+        }
 
-  </main>
+        /* ── Page context ─────────────────────────────────── */
+        var path        = location.pathname;
+        var pathTag     = path.match(/^\/tagged\/([^\/]+)/);
+        var tag         = norm(pathTag ? pathTag[1] : body.getAttribute('data-tag'));
+        var rawTagLabel = body.getAttribute('data-tag') || tag;
+        var isPermalink = body.classList.contains('permalink-page');
+        var isEverything = !tag && !isPermalink && /^\/(page\/\d+\/?)?$/.test(path);
 
-  <!-- ═══════════════════════ LIGHTBOX ══════════════════════════ -->
-  {block:IfUseLightbox}
-  <div id="lb" class="lb" role="dialog" aria-modal="true" aria-label="Photo" aria-hidden="true">
-    <button class="lb-close" id="lb-close" aria-label="Close">✕</button>
-    <button class="lb-prev"  id="lb-prev"  aria-label="Previous">‹</button>
-    <img class="lb-img" id="lb-img" src="" alt="">
-    <button class="lb-next"  id="lb-next"  aria-label="Next">›</button>
-  </div>
-  {/block:IfUseLightbox}
+        var section = '';
+        if (isEverything) section = 'everything';
+        else if (tag === 'people' || find(CONFIG.people, tag)) section = 'people';
+        else if (tag === 'travel' || find(CONFIG.travel, tag)) section = 'travel';
+        else if (tag === 'series' || find(CONFIG.series, tag)) section = 'series';
+        else if (/^\/info\/?$/.test(path)) section = 'info';
 
-  <!-- ═══════════════════════ SCRIPT ════════════════════════════ -->
-  <script>
-  (function () {
-    'use strict';
+        var isLanding = tag === 'travel' || tag === 'series';
+        var isStream  = !isLanding && !isPermalink;
 
-    var $ = function (s, c) { return (c || document).querySelector(s); };
-    var $$ = function (s, c) { return Array.from((c || document).querySelectorAll(s)); };
+        /* Grid view columns per page type (phones always use 2). */
+        var GRID_COLUMNS = { everything: 4, travel: 3, series: 3, people: 4, other: 4 };
+        /* Grid view style: 'masonry' (uncropped photos stacked in columns, no gaps)
+           or 'grid' (rows, photos centered in each cell). */
+        var GRID_LAYOUT = 'masonry';
+        var gridCols = GRID_COLUMNS[section] || GRID_COLUMNS.other;
+        grid.style.setProperty('--cols', gridCols);
+        var masonry = GRID_LAYOUT === 'masonry';
+        if (masonry) grid.classList.add('grid--masonry');
+        var tileSizes = '(max-width: 900px) 50vw, ' + Math.round(80 / gridCols) + 'vw';
 
-    /* ── Detect page type ──────────────────────────────────────── */
-    var path     = location.pathname;
-    var tagMatch = path.match(/^\/tagged\/([^/]+)/);
-    var currentTag = tagMatch ? decodeURIComponent(tagMatch[1]).toLowerCase() : null;
-    var isTripPage = currentTag && (window.TRAVEL_TAGS || []).indexOf(currentTag) >= 0;
-    var isPagePage = !!$('.page-body');
-
-    /* ── Travel: activate link + breadcrumb on trip pages ─────── */
-    if (isTripPage) {
-      var travelLink = document.getElementById('link-travel');
-      if (travelLink) travelLink.classList.add('active');
-      $$('#nav-links a').forEach(function (a) {
-        if (a !== travelLink) a.classList.remove('active');
-      });
-      var bc = document.getElementById('trip-breadcrumb');
-      if (bc) bc.classList.add('visible');
-    }
-
-    /* ── Hide view toggle on custom pages (travel index, etc.) ── */
-    if (isPagePage) {
-      var vt = document.getElementById('view-toggle');
-      if (vt) vt.style.visibility = 'hidden';
-    }
-
-    /* ── View mode (grid / list) ───────────────────────────────── */
-    var gallery = document.getElementById('gallery');
-    var gridEl  = document.getElementById('grid');
-    var btnGrid = document.getElementById('btn-grid');
-    var btnList = document.getElementById('btn-list');
-    var VIEWS   = { grid: 'gallery-grid', list: 'gallery-list' };
-    var TILES   = { grid: 'tile-grid',    list: 'tile-list' };
-
-    var savedView = 'grid';
-    try { savedView = localStorage.getItem('view') || 'grid'; } catch (e) {}
-
-    function setView(v, save) {
-      if (!gallery || !gridEl) return;
-      var other = v === 'grid' ? 'list' : 'grid';
-      gridEl.classList.remove(VIEWS[other]);
-      gridEl.classList.add(VIEWS[v]);
-      $$('.tile', gridEl).forEach(function (t) {
-        t.classList.remove(TILES[other]);
-        t.classList.add(TILES[v]);
-      });
-      if (btnGrid) btnGrid.classList.toggle('active', v === 'grid');
-      if (btnList) btnList.classList.toggle('active', v === 'list');
-      if (save) { try { localStorage.setItem('view', v); } catch (e) {} }
-    }
-
-    if (btnGrid) btnGrid.addEventListener('click', function () { setView('grid', true); });
-    if (btnList) btnList.addEventListener('click', function () { setView('list', true); });
-    setView(savedView, false);
-
-    /* ── Lazy loading ──────────────────────────────────────────── */
-    function loadImg(img) {
-      var src = img.getAttribute('data-src');
-      if (!src || img.src === src) return;
-      img.src = src;
-      img.removeAttribute('data-src');
-    }
-
-    var imgObs;
-    if ('IntersectionObserver' in window) {
-      imgObs = new IntersectionObserver(function (entries) {
-        entries.forEach(function (e) {
-          if (e.isIntersecting) { loadImg(e.target); imgObs.unobserve(e.target); }
-        });
-      }, { rootMargin: '600px 0px' });
-      $$('img[data-src]').forEach(function (img) { imgObs.observe(img); });
-    } else {
-      $$('img[data-src]').forEach(loadImg);
-    }
-
-    /* ── Infinite scroll ───────────────────────────────────────── */
-    var sentinel = document.getElementById('sentinel');
-    var nextLink = document.getElementById('next-page');
-    var loading  = false;
-
-    function fetchNext() {
-      if (loading || !nextLink) return;
-      var url = nextLink.getAttribute('href');
-      if (!url) return;
-      loading = true;
-      if (sentinel) sentinel.classList.add('is-loading');
-      fetch(url, { credentials: 'same-origin' })
-        .then(function (r) { return r.text(); })
-        .then(function (html) {
-          var doc = new DOMParser().parseFromString(html, 'text/html');
-          var newGrid = doc.getElementById('grid');
-          var newTiles = newGrid ? $$('.tile', newGrid) : [];
-          var v = (btnGrid && btnGrid.classList.contains('active')) ? 'grid' : 'list';
-          newTiles.forEach(function (t) {
-            var node = document.importNode(t, true);
-            node.classList.remove('tile-grid', 'tile-list');
-            node.classList.add(TILES[v]);
-            gridEl.appendChild(node);
-            if (imgObs) {
-              $$('img[data-src]', node).forEach(function (img) { imgObs.observe(img); });
-            } else {
-              $$('img[data-src]', node).forEach(loadImg);
+        var navLinks = document.querySelectorAll('.primary-nav__link');
+        for (var n = 0; n < navLinks.length; n++) {
+            if (navLinks[n].getAttribute('data-section') === section) {
+                navLinks[n].classList.add('active');
+                navLinks[n].setAttribute('aria-current', 'page');
             }
-          });
-          lbItems = collectLbItems();
-          var newNext = doc.getElementById('next-page');
-          if (newNext && newNext.getAttribute('href')) {
-            nextLink.setAttribute('href', newNext.getAttribute('href'));
-          } else {
-            nextLink = null;
-          }
-        })
-        .catch(function () {})
-        .then(function () {
-          loading = false;
-          if (sentinel) sentinel.classList.remove('is-loading');
+        }
+
+        /* ── Context header (breadcrumbs) ──────────────────── */
+        function renderPageHead() {
+            if ((section === 'people' || section === 'travel' || section === 'series') && (!isLanding || section === 'travel')) {
+                var item = find(CONFIG[section], tag);
+                var label = tag === section ? ALL_LABEL[section] : (item ? item.label : rawTagLabel);
+                var crumbs = el('div', 'crumbs');
+                var parent = el('a', 'crumbs__parent', { people: 'People', travel: 'Travel', series: 'Series' }[section]);
+                parent.href = tagUrl(section);
+                crumbs.appendChild(parent);
+                crumbs.appendChild(el('span', 'crumbs__sep', '/'));
+                if (section === 'people' || section === 'travel') {
+                    // Name + caret opens the list of everyone / everywhere.
+                    var toggleBtn = el('button', 'crumbs__toggle');
+                    toggleBtn.type = 'button';
+                    toggleBtn.setAttribute('aria-expanded', 'false');
+                    toggleBtn.setAttribute('aria-controls', 'crumb-dropdown');
+                    toggleBtn.appendChild(el('span', 'crumbs__current', label));
+                    toggleBtn.insertAdjacentHTML('beforeend', '<svg class="crumbs__caret" viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 3.5L5 7l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>');
+                    crumbs.appendChild(toggleBtn);
+                } else {
+                    crumbs.appendChild(el('span', 'crumbs__current', label));
+                }
+                pageHead.appendChild(crumbs);
+                if (toggleBtn) {
+                    var dropdown = el('nav', 'people-panel people-panel--dropdown people-panel--' + section);
+                    dropdown.id = 'crumb-dropdown';
+                    dropdown.setAttribute('aria-label', ALL_LABEL[section]);
+                    dropdown.hidden = true;
+                    pageHead.appendChild(dropdown);
+                    wireDropdown(toggleBtn, dropdown, section);
+                }
+                return;
+            }
+            if (section === 'everything' && !/\/page\/\d+/.test(path)) {
+                // "Latest post: June 12, 2026" from the newest post's timestamp.
+                var first = feed.querySelector('.js-post[data-ts]');
+                var ts = first && parseInt(first.getAttribute('data-ts'), 10);
+                if (ts) {
+                    var latest = el('div', 'crumbs');
+                    latest.appendChild(el('span', null, 'Latest post:'));
+                    latest.appendChild(document.createTextNode(' '));
+                    latest.appendChild(el('span', 'crumbs__current', new Date(ts * 1000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })));
+                    pageHead.appendChild(latest);
+                }
+                return;
+            }
+            if (section === 'info') {
+                renderInfo();
+                return;
+            }
+            if (tag && !isLanding) {
+                pageHead.appendChild(el('div', 'crumbs crumbs__current', '#' + rawTagLabel));
+            }
+        }
+
+        /* ── Info page ────────────────────────────────────── */
+        function copyText(text) {
+            if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(text);
+            var ta = el('textarea');
+            ta.value = text;
+            ta.style.cssText = 'position:fixed;opacity:0';
+            document.body.appendChild(ta);
+            ta.select();
+            try { document.execCommand('copy'); } finally { ta.remove(); }
+            return Promise.resolve();
+        }
+
+        function renderInfo() {
+            body.classList.add('is-info');
+            var box = el('div', 'info');
+            box.appendChild(el('p', 'info__text', INFO.text));
+
+            var ul = el('ul', 'info__links');
+            // Icon + address are one control: hover shows "Copy", click copies the email.
+            var li = el('li');
+            var mail = el('button', 'info__email');
+            mail.type = 'button';
+            mail.setAttribute('aria-label', 'Copy email address ' + INFO.email);
+            mail.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M10.5 3.5v-.5a1.5 1.5 0 0 0-1.5-1.5H4A1.5 1.5 0 0 0 2.5 3v5A1.5 1.5 0 0 0 4 9.5h.5" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>';
+            mail.appendChild(document.createTextNode(INFO.email));
+            var tip = el('span', 'info__tip', 'Copy');
+            tip.setAttribute('aria-hidden', 'true');
+            mail.appendChild(tip);
+            var status = el('span', 'visually-hidden');
+            status.setAttribute('aria-live', 'polite');
+            var t;
+            mail.addEventListener('click', function () {
+                copyText(INFO.email).then(function () {
+                    tip.textContent = 'Copied';
+                    status.textContent = 'Email address copied';
+                    mail.classList.add('is-copied');
+                    clearTimeout(t);
+                    t = setTimeout(function () {
+                        mail.classList.remove('is-copied');
+                        tip.textContent = 'Copy';
+                        status.textContent = '';
+                    }, 1600);
+                });
+            });
+            mail.addEventListener('mouseleave', function () {
+                if (!mail.classList.contains('is-copied')) tip.textContent = 'Copy';
+            });
+            li.appendChild(mail);
+            li.appendChild(status);
+            ul.appendChild(li);
+
+            li = el('li');
+            var ig = el('a', null, '@' + INFO.instagram);
+            ig.href = 'https://www.instagram.com/' + INFO.instagram + '/';
+            ig.target = '_blank';
+            ig.rel = 'noopener';
+            li.appendChild(ig);
+            ul.appendChild(li);
+
+            li = el('li');
+            var site = el('a', null, INFO.website);
+            site.href = 'https://' + INFO.website + '/';
+            site.target = '_blank';
+            site.rel = 'noopener';
+            li.appendChild(site);
+            ul.appendChild(li);
+            box.appendChild(ul);
+
+            if (INFO.photo) {
+                var ph = makePh(1.5, pastel(INFO.photo), INFO.photo, '', '', 'Andrew Nedimyer');
+                ph.classList.add('info__photo');
+                box.appendChild(ph);
+                lazy(ph.firstChild);
+                if (INFO.selfTag) cycleSelfPhotos(ph);
+            }
+            pageHead.appendChild(box);
+        }
+
+        // Media id shared by every size of a Tumblr image: 64.media.tumblr.com/<id>/…
+        function mediaKey(url) {
+            try { return new URL(url, location.href).pathname.split('/')[1] || url; } catch (e) { return url; }
+        }
+
+        // Collect every photo tagged INFO.selfTag (all pages of /tagged/<selfTag>).
+        function loadSelfPhotos() {
+            var found = [], seenKeys = {};
+            function take(doc) {
+                Array.prototype.slice.call(doc.querySelectorAll('.js-post template.js-body')).forEach(function (tpl) {
+                    var imgs = Array.prototype.slice.call(tpl.content.querySelectorAll('img'));
+                    var parsed = imgs.map(function (i) { return parseAlt(i.getAttribute('alt')); });
+                    var tagged = parsed.some(function (pa) { return pa.tags; });
+                    imgs.forEach(function (img, n) {
+                        if (tagged && (parsed[n].tags || []).indexOf(INFO.selfTag) === -1) return;
+                        var a = img.closest('.post_media_photo_anchor');
+                        var full = (a && a.getAttribute('data-big-photo')) || img.getAttribute('src');
+                        if (!full || seenKeys[mediaKey(full)]) return;
+                        seenKeys[mediaKey(full)] = true;
+                        var w = parseFloat((a && a.getAttribute('data-big-photo-width')) || img.getAttribute('data-orig-width')) || 0;
+                        var h = parseFloat((a && a.getAttribute('data-big-photo-height')) || img.getAttribute('data-orig-height')) || 0;
+                        found.push({ full: full, srcset: cleanSrcset(img.getAttribute('srcset')), ratio: w && h ? w / h : 1.5 });
+                    });
+                });
+                return doc.querySelector('.js-next-page');
+            }
+            function page(n) {
+                var url = tagUrl(INFO.selfTag) + (n > 1 ? '/page/' + n : '');
+                return fetch(url, { credentials: 'same-origin' })
+                    .then(function (r) { return r.ok ? r.text() : ''; })
+                    .then(function (html) {
+                        var more = html && take(new DOMParser().parseFromString(html, 'text/html'));
+                        return more && n < 50 ? page(n + 1) : found;
+                    })
+                    .catch(function () { return found; });
+            }
+            return page(1);
+        }
+
+        function cycleSelfPhotos(ph) {
+            var list = [{ full: INFO.photo, srcset: '', ratio: 0 }];
+            var i = 0;
+            loadSelfPhotos().then(function (photos) {
+                photos.forEach(function (p) {
+                    if (mediaKey(p.full) === mediaKey(INFO.photo)) list[0] = p;
+                    else if (p.ratio >= 1) list.push(p);   // landscape/square only
+                });
+                if (list.length > 1) {
+                    ph.classList.add('is-cycling');
+                    ph.title = 'Click for another';
+                    preload(1);
+                }
+            });
+            function preload(n) {
+                var p = list[n % list.length];
+                if (!p || p.pre) return;
+                p.pre = new Image();
+                if (p.srcset) { p.pre.sizes = '620px'; p.pre.srcset = p.srcset; }
+                p.pre.src = p.full;
+            }
+            ph.addEventListener('click', function () {
+                if (list.length < 2) return;
+                i = (i + 1) % list.length;
+                var p = list[i];
+                var img = ph.firstChild;
+                if (p.ratio) ph.style.setProperty('--r', p.ratio);
+                ph.style.setProperty('--c', pastel(p.full));
+                ph.classList.remove('is-loaded');
+                img.onload = img.onerror = function () { fitRatio(ph, img); ph.classList.add('is-loaded'); };
+                img.removeAttribute('srcset');
+                if (p.srcset) { img.sizes = '620px'; img.srcset = p.srcset; }
+                img.src = p.full;
+                preload(i + 1);
+            });
+        }
+
+        /* ── People picker (breadcrumb dropdown + bottom-right button) ── */
+        var ALL_LABEL = { people: 'Everyone', travel: 'Everywhere', series: 'All series' };
+
+        // Alphabetical list for a category. People get A–Z letter headings.
+        function fillList(panel, cat) {
+            var all = el('a', 'people-panel__all', ALL_LABEL[cat]);
+            all.href = tagUrl(cat);
+            if (tag === cat) { all.classList.add('active'); all.setAttribute('aria-current', 'page'); }
+            panel.appendChild(all);
+
+            var ul = el('ul', 'people-panel__list');
+            var lastLetter = '', group = ul;
+            CONFIG[cat].slice().sort(function (a, b) {
+                return a.label.localeCompare(b.label, undefined, { sensitivity: 'base' });
+            }).forEach(function (p) {
+                var letter = p.label.charAt(0).toUpperCase();
+                if (cat === 'people' && letter !== lastLetter) {
+                    // One group per letter so a heading never splits from its names.
+                    var g = el('li', 'people-panel__group');
+                    g.appendChild(el('span', 'people-panel__letter', letter));
+                    group = el('ul');
+                    g.appendChild(group);
+                    ul.appendChild(g);
+                    lastLetter = letter;
+                }
+                var li = el('li');
+                var a = el('a', null, p.label);
+                a.href = tagUrl(p.tag);
+                if (norm(p.tag) === tag) { a.classList.add('active'); a.setAttribute('aria-current', 'page'); }
+                li.appendChild(a);
+                group.appendChild(li);
+            });
+            panel.appendChild(ul);
+        }
+
+        var dropdowns = [];
+        function wireDropdown(trigger, panel, cat) {
+            fillList(panel, cat);
+            var dd = {
+                setOpen: function (open) {
+                    panel.hidden = !open;
+                    trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+                    if (open) {
+                        var active = panel.querySelector('.people-panel__list a.active');
+                        if (active) active.scrollIntoView({ block: 'nearest' });
+                    }
+                }
+            };
+            trigger.addEventListener('click', function () {
+                var open = panel.hidden;
+                dropdowns.forEach(function (d) { if (d !== dd) d.setOpen(false); });
+                dd.setOpen(open);
+            });
+            document.addEventListener('click', function (e) {
+                if (!panel.hidden && !panel.contains(e.target) && !trigger.contains(e.target)) dd.setOpen(false);
+            });
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && !panel.hidden) { dd.setOpen(false); trigger.focus(); }
+            });
+            dropdowns.push(dd);
+        }
+
+        // Bottom-right person button (People pages only).
+        function renderPeoplePicker() {
+            var btn = document.getElementById('people-btn');
+            if (tag !== 'people') btn.classList.add('is-filtered');
+            wireDropdown(btn, document.getElementById('people-panel'), 'people');
+            document.getElementById('people-toggle').hidden = false;
+        }
+
+        /* ── Lazy loading ─────────────────────────────────── */
+        // If a photo had no size data, correct the placeholder to its real shape.
+        function fitRatio(ph, img) {
+            if (!img.naturalWidth || !img.naturalHeight) return;
+            var real = img.naturalWidth / img.naturalHeight;
+            var cur = parseFloat(ph.style.getPropertyValue('--r')) || 0;
+            if (Math.abs(real - cur) / real > 0.02) ph.style.setProperty('--r', real);
+        }
+        function loadImg(img) {
+            var ph = img.parentNode;
+            var done = function () { fitRatio(ph, img); ph.classList.add('is-loaded'); };
+            img.onload = done;
+            img.onerror = done;
+            if (img.getAttribute('data-srcset')) {
+                img.srcset = img.getAttribute('data-srcset');
+                img.removeAttribute('data-srcset');
+            }
+            img.src = img.getAttribute('data-src');
+            img.removeAttribute('data-src');
+        }
+        var io = ('IntersectionObserver' in window) ? new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (!entry.isIntersecting) return;
+                io.unobserve(entry.target);
+                loadImg(entry.target);
+            });
+        }, { rootMargin: '800px 0px' }) : null;
+        function lazy(img) { if (io) io.observe(img); else loadImg(img); }
+
+        function makePh(ratio, color, src, srcset, sizes, alt) {
+            var ph = el('span', 'ph');
+            ph.style.setProperty('--r', ratio);
+            ph.style.setProperty('--c', color);
+            var img = el('img');
+            img.alt = alt || '';
+            img.decoding = 'async';
+            if (src) img.setAttribute('data-src', src);
+            if (srcset) { img.setAttribute('data-srcset', srcset); img.sizes = sizes; }
+            ph.appendChild(img);
+            return ph;
+        }
+
+        /* ── Posts → feed + grid ──────────────────────────── */
+        /* Per-photo tags live at the end of each image's alt text: "… [bucky, japan]".
+           On People/Travel/Series pages, photos in a tagged post that don't match are hidden.
+           Posts with no per-photo tags show all their photos. */
+        var ALT_TAGS = /\s*\[([^\[\]]*)\]\s*$/;
+        var filterTag = (section && section !== 'everything' && !isPermalink) ? tag : '';
+
+        function parseAlt(alt) {
+            var s = String(alt || '').trim();
+            if (s.toLowerCase() === 'image') s = '';
+            var m = s.match(ALT_TAGS);
+            if (!m) return { desc: s, tags: null };
+            return { desc: s.slice(0, m.index).trim(), tags: m[1].split(',').map(norm).filter(Boolean) };
+        }
+        function categoryOf(t) {
+            if (t === 'people' || t === 'travel' || t === 'series') return t;
+            if (find(CONFIG.people, t)) return 'people';
+            if (find(CONFIG.travel, t)) return 'travel';
+            if (find(CONFIG.series, t)) return 'series';
+            return '';
+        }
+        function photoMatches(tags) {
+            if (!filterTag) return true;
+            return tags.some(function (t) { return t === filterTag || categoryOf(t) === filterTag; });
+        }
+
+        // The main People page shows every portrait in random order (fresh on each visit).
+        var shuffleMode = tag === 'people' && !isPermalink;
+
+        function hydratePost(article) {
+            var tpl = article.querySelector('template.js-body');
+            if (!tpl) return;
+            var frag = tpl.content.cloneNode(true);
+            var feedImgs = [];
+            // Tumblr adds an "ALT" badge after every image with alt text; never show it.
+            Array.prototype.slice.call(frag.querySelectorAll('.tmblr-alt-text-helper')).forEach(function (n) { n.remove(); });
+            var imgs = Array.prototype.slice.call(frag.querySelectorAll('img'));
+            var parsed = imgs.map(function (img) { return parseAlt(img.getAttribute('alt')); });
+            var postHasPhotoTags = parsed.some(function (p) { return p.tags; });
+            var shown = 0;
+
+            imgs.forEach(function (img, n) {
+                var a    = img.closest('.post_media_photo_anchor');
+                var src  = img.getAttribute('src') || '';
+                var full = (a && a.getAttribute('data-big-photo')) || src;
+                if (!full) return;
+                if (postHasPhotoTags && !photoMatches(parsed[n].tags || [])) {
+                    var box = img.closest('figure') || a || img;
+                    box.parentNode.removeChild(box);
+                    return;
+                }
+                shown++;
+                var w = parseFloat((a && a.getAttribute('data-big-photo-width')) || img.getAttribute('data-orig-width') || img.getAttribute('width')) || 0;
+                var h = parseFloat((a && a.getAttribute('data-big-photo-height')) || img.getAttribute('data-orig-height') || img.getAttribute('height')) || 0;
+                var ratio  = (w && h) ? w / h : 1.5;
+                var srcset = cleanSrcset(img.getAttribute('srcset'));
+                var color  = pastel(full);
+                var alt    = parsed[n].desc;
+
+                var sizes = '(max-width: 961px) 100vw, ' + Math.round(Math.min(1200, 800 * ratio)) + 'px';
+                var ph = makePh(ratio, color, src || full, srcset, sizes, alt);
+                img.parentNode.replaceChild(ph, img);
+                feedImgs.push(ph.firstChild);
+
+                images.push({ full: full, srcset: srcset, ratio: ratio, color: color, alt: alt, feedPh: ph, tags: parsed[n].tags || [] });
+                if (!shuffleMode) addTile(images.length - 1);
+            });
+
+            if (imgs.length && !shown) {
+                article.hidden = true;
+                return;
+            }
+            Array.prototype.slice.call(frag.querySelectorAll('.npf_col, .npf_row')).reverse().forEach(function (n) {
+                if (!n.querySelector('img, .ph') && !n.textContent.trim()) n.parentNode.removeChild(n);
+            });
+            tpl.parentNode.replaceChild(frag, tpl);
+            if (!shuffleMode) feedImgs.forEach(lazy);
+        }
+
+        /* ── Shuffle: load every page, then randomize all photos ─ */
+        function fetchPage(url) {
+            return fetch(url, { credentials: 'same-origin' })
+                .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
+                .then(function (html) {
+                    var doc = new DOMParser().parseFromString(html, 'text/html');
+                    var added = 0;
+                    Array.prototype.slice.call(doc.querySelectorAll('.js-post')).forEach(function (a) {
+                        if (!a.id || seen[a.id]) return;
+                        seen[a.id] = true;
+                        hydratePost(document.importNode(a, true));
+                        added++;
+                    });
+                    return { added: added, hasNext: !!doc.querySelector('.js-next-page') };
+                })
+                .catch(function () { return { added: 0, hasNext: false }; });
+        }
+
+        function loadAllThenShuffle() {
+            body.classList.add('is-shuffling');
+            var sk = makeSkeleton(2, 3, false);
+            var base = location.pathname.replace(/\/page\/\d+\/?$/, '').replace(/\/$/, '');
+            var BATCH = 4, MAX_PAGE = 200;
+            function batch(start) {
+                if (!nextUrl || start > MAX_PAGE) return Promise.resolve();
+                var jobs = [];
+                for (var n = start; n < start + BATCH; n++) jobs.push(fetchPage(base + '/page/' + n));
+                return Promise.all(jobs).then(function (results) {
+                    var last = results[results.length - 1];
+                    var done = results.some(function (r) { return !r.added || !r.hasNext; });
+                    return done || !last.hasNext ? null : batch(start + BATCH);
+                });
+            }
+            return batch(2).then(function () {
+                nextUrl = null;
+                for (var i = images.length - 1; i > 0; i--) {
+                    var j = Math.floor(Math.random() * (i + 1));
+                    var t = images[i]; images[i] = images[j]; images[j] = t;
+                }
+                feed.textContent = '';
+                images.forEach(function (it, i) {
+                    var art = el('article', 'post');
+                    var bodyEl = el('div', 'post-body');
+                    bodyEl.appendChild(it.feedPh);
+                    art.appendChild(bodyEl);
+                    feed.appendChild(art);
+                    lazy(it.feedPh.firstChild);
+                    addTile(i);
+                });
+                sk.remove();
+                body.classList.remove('is-shuffling');
+            });
+        }
+
+        function addTile(i) {
+            var it = images[i];
+            var btn = el('button', 'tile');
+            btn.type = 'button';
+            btn.setAttribute('aria-label', 'Open photo ' + (i + 1));
+            btn.setAttribute('data-index', i);
+            var ph = makePh(it.ratio, it.color, it.full, it.srcset, tileSizes, it.alt);
+            btn.appendChild(ph);
+            if (masonry) {
+                btn.setAttribute('data-r', it.ratio);
+                if (!masonryCols.length) buildMasonry();
+                placeTile(btn);
+            } else {
+                grid.appendChild(btn);
+            }
+            lazy(ph.firstChild);
+        }
+
+        /* Masonry: each photo goes into the currently shortest column (photo order
+           still reads roughly left→right, top→bottom). Phones use 2 columns. */
+        var masonryCols = [], masonryHeights = [];
+        var phoneGrid = window.matchMedia('(max-width: 900px)');
+        function buildMasonry() {
+            var tiles = Array.prototype.slice.call(grid.querySelectorAll('.tile')).sort(function (a, b) {
+                return a.getAttribute('data-index') - b.getAttribute('data-index');
+            });
+            grid.textContent = '';
+            masonryCols = []; masonryHeights = [];
+            var n = phoneGrid.matches ? 2 : gridCols;
+            for (var c = 0; c < n; c++) {
+                var col = el('div', 'grid__col');
+                grid.appendChild(col);
+                masonryCols.push(col);
+                masonryHeights.push(0);
+            }
+            tiles.forEach(placeTile);
+        }
+        function placeTile(btn) {
+            var i = masonryHeights.indexOf(Math.min.apply(null, masonryHeights));
+            masonryCols[i].appendChild(btn);
+            masonryHeights[i] += 1 / (parseFloat(btn.getAttribute('data-r')) || 1.5) + 0.06;
+        }
+        if (masonry) {
+            var onBreakpoint = function () { if (masonryCols.length) buildMasonry(); };
+            if (phoneGrid.addEventListener) phoneGrid.addEventListener('change', onBreakpoint);
+            else phoneGrid.addListener(onBreakpoint);
+        }
+
+        grid.addEventListener('click', function (e) {
+            var t = e.target.closest('.tile');
+            if (t) openLightbox(+t.getAttribute('data-index'));
         });
-    }
 
-    if (sentinel && nextLink && 'IntersectionObserver' in window) {
-      var scrollObs = new IntersectionObserver(function (entries) {
-        if (entries[0].isIntersecting) fetchNext();
-      }, { rootMargin: '1000px 0px' });
-      scrollObs.observe(sentinel);
-    }
-
-    /* ── Lightbox ──────────────────────────────────────────────── */
-    var lb      = document.getElementById('lb');
-    var lbImg   = document.getElementById('lb-img');
-    var lbClose = document.getElementById('lb-close');
-    var lbPrev  = document.getElementById('lb-prev');
-    var lbNext  = document.getElementById('lb-next');
-    var lbItems = [];
-    var lbIndex = 0;
-    var lbLast  = null;
-
-    function collectLbItems() {
-      if (!lb) return [];
-      var items = [];
-      $$('.tile').forEach(function (tile) {
-        if (tile.hasAttribute('data-lb-src')) {
-          items.push({ src: tile.getAttribute('data-lb-src'), alt: tile.getAttribute('data-lb-alt') || '', tile: tile });
+        /* ── Placeholder blocks while posts load ──────────── */
+        var skeletonGrids = [];
+        function fillSkeletonGrid(g, gridRows, off) {
+            g.textContent = '';
+            var count = phoneGrid.matches ? 2 : gridCols;
+            var gap = phoneGrid.matches ? 12 : 20;
+            var container = g.parentNode.parentNode;
+            var style = getComputedStyle(container);
+            var width = container.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+            var columnWidth = Math.max(1, (width - gap * (count - 1)) / count);
+            var targetHeight = Math.max(window.innerHeight, window.innerHeight - g.getBoundingClientRect().top);
+            var ratios = [1.5, 0.67, 1.5, 1, 0.67, 1.5];
+            var cols = [], heights = [];
+            if (masonry) {
+                for (var c = 0; c < count; c++) {
+                    var col = el('div', 'grid__col');
+                    g.appendChild(col);
+                    cols.push(col);
+                    heights.push(0);
+                }
+            }
+            var minimum = gridRows * count;
+            var total = masonry ? minimum : Math.max(minimum, Math.ceil(targetHeight / (columnWidth / 1.5 + gap)) * count);
+            for (var i = 0; i < total || (masonry && Math.min.apply(null, heights) - gap < targetHeight); i++) {
+                var ratio = masonry ? (images.length ? images[i % images.length].ratio : ratios[i % ratios.length]) : 1.5;
+                var ph = el('span', 'ph');
+                ph.style.setProperty('--r', ratio);
+                ph.style.setProperty('--c', PALETTE[(off + i * 3) % PALETTE.length]);
+                if (masonry) {
+                    var shortest = heights.indexOf(Math.min.apply(null, heights));
+                    cols[shortest].appendChild(ph);
+                    heights[shortest] += columnWidth / ratio + gap;
+                } else {
+                    g.appendChild(ph);
+                }
+            }
         }
-        if (tile.hasAttribute('data-photoset')) {
-          $$('img[data-hires]', tile).forEach(function (img) {
-            items.push({ src: img.getAttribute('data-hires'), alt: img.alt || '', tile: tile });
-          });
-          if (!tile.querySelector('img[data-hires]')) {
-            var f = $('img', tile);
-            if (f) items.push({ src: f.getAttribute('data-src') || f.src, alt: f.alt, tile: tile });
-          }
+        window.addEventListener('resize', function () {
+            skeletonGrids = skeletonGrids.filter(function (item) { return item.grid.isConnected; });
+            skeletonGrids.forEach(function (item) { fillSkeletonGrid(item.grid, item.rows, item.off); });
+        });
+        function makeSkeleton(feedBlocks, gridRows, more) {
+            var sk = el('div', 'skeleton' + (more ? ' skeleton--more' : ''));
+            sk.setAttribute('aria-hidden', 'true');
+            var f = el('div', 'skeleton__feed');
+            var g = el('div', 'grid skeleton__grid');
+            if (masonry) g.classList.add('grid--masonry');
+            g.style.setProperty('--cols', gridCols);
+            var off = Math.floor(Math.random() * PALETTE.length);
+            function block(i) {
+                var ph = el('span', 'ph');
+                ph.style.setProperty('--r', 1.5);
+                ph.style.setProperty('--c', PALETTE[(off + i * 3) % PALETTE.length]);
+                return ph;
+            }
+            for (var i = 0; i < feedBlocks; i++) f.appendChild(block(i));
+            sk.appendChild(f);
+            sk.appendChild(g);
+            loader.parentNode.insertBefore(sk, loader);
+            fillSkeletonGrid(g, gridRows, off);
+            skeletonGrids = skeletonGrids.filter(function (item) { return item.grid.isConnected; });
+            skeletonGrids.push({ grid: g, rows: gridRows, off: off });
+            return sk;
         }
-      });
-      return items;
-    }
-    lbItems = collectLbItems();
 
-    function lbShow(i) {
-      if (!lb || !lbItems.length) return;
-      lbIndex = (i + lbItems.length) % lbItems.length;
-      var item = lbItems[lbIndex];
-      lbImg.classList.add('loading');
-      lbImg.onload = function () { lbImg.classList.remove('loading'); };
-      lbImg.src = item.src;
-      lbImg.alt = item.alt;
-      [lbIndex + 1, lbIndex - 1].forEach(function (j) {
-        var n = lbItems[(j + lbItems.length) % lbItems.length];
-        if (n) { (new Image()).src = n.src; }
-      });
-    }
+        /* ── Infinite scroll (follows the current tag/page) ─ */
+        var nextLink = loader.querySelector('.js-next-page');
+        var nextUrl  = nextLink ? nextLink.href : null;
+        var pending  = null;
 
-    function lbOpen(tile) {
-      if (!lb) return;
-      lbItems = collectLbItems();
-      var i = lbItems.findIndex(function (it) { return it.tile === tile; });
-      lbLast = document.activeElement;
-      lbShow(i >= 0 ? i : 0);
-      lb.classList.add('open');
-      lb.setAttribute('aria-hidden', 'false');
-      document.body.classList.add('lb-open');
-      if (lbClose) lbClose.focus();
-    }
+        // No status text, ever: placeholder blocks show while loading, and failed
+        // fetches keep their blocks on screen and retry quietly with backoff.
+        var retrySk = null, retryDelay = 2000;
 
-    function lbCloseFn() {
-      if (!lb) return;
-      lb.classList.remove('open');
-      lb.setAttribute('aria-hidden', 'true');
-      document.body.classList.remove('lb-open');
-      if (lbLast) lbLast.focus();
-    }
+        function loadMore() {
+            if (pending) return pending;
+            if (!nextUrl) return Promise.resolve(false);
+            var sk = retrySk || makeSkeleton(1, 1, true);
+            retrySk = null;
+            var url = nextUrl;
+            pending = fetch(url, { credentials: 'same-origin' })
+                .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
+                .then(function (html) {
+                    var doc = new DOMParser().parseFromString(html, 'text/html');
+                    var added = 0;
+                    Array.prototype.slice.call(doc.querySelectorAll('.js-post')).forEach(function (a) {
+                        if (!a.id || seen[a.id]) return;
+                        seen[a.id] = true;
+                        var node = document.importNode(a, true);
+                        feed.appendChild(node);
+                        hydratePost(node);
+                        added++;
+                    });
+                    var nl = doc.querySelector('.js-next-page');
+                    nextUrl = nl ? new URL(nl.getAttribute('href'), url).href : null;
+                    sk.remove();
+                    pending = null;
+                    retryDelay = 2000;
+                    updateLightboxNav();
+                    requestAnimationFrame(maybeLoadMore);
+                    return added > 0;
+                })
+                .catch(function () {
+                    retrySk = sk;
+                    pending = null;
+                    setTimeout(loadMore, retryDelay);
+                    retryDelay = Math.min(retryDelay * 2, 30000);
+                    return false;
+                });
+            return pending;
+        }
 
-    if (lb) {
-      lbClose.addEventListener('click', lbCloseFn);
-      lbPrev.addEventListener('click',  function () { lbShow(lbIndex - 1); });
-      lbNext.addEventListener('click',  function () { lbShow(lbIndex + 1); });
-      lb.addEventListener('click', function (e) { if (e.target === lb) lbCloseFn(); });
-      var tx = null;
-      lb.addEventListener('touchstart', function (e) { tx = e.touches[0].clientX; }, { passive: true });
-      lb.addEventListener('touchend', function (e) {
-        if (tx === null) return;
-        var dx = e.changedTouches[0].clientX - tx;
-        if (Math.abs(dx) > 48) lbShow(lbIndex + (dx < 0 ? 1 : -1));
-        tx = null;
-      });
-    }
-    document.addEventListener('keydown', function (e) {
-      if (!lb || !lb.classList.contains('open')) return;
-      if (e.key === 'Escape')     lbCloseFn();
-      if (e.key === 'ArrowLeft')  lbShow(lbIndex - 1);
-      if (e.key === 'ArrowRight') lbShow(lbIndex + 1);
-    });
-    document.addEventListener('click', function (e) {
-      var tile = e.target.closest('.tile');
-      if (!tile || !lb) return;
-      e.preventDefault();
-      lbOpen(tile);
-    });
+        function maybeLoadMore() {
+            if (!isStream || !nextUrl || pending) return;
+            if (loader.getBoundingClientRect().top < window.innerHeight + 1500) loadMore();
+        }
 
-    /* ── Category tag-page active link (client-side fallback) ──── */
-    if (currentTag && !isTripPage) {
-      $$('#nav-links a').forEach(function (a) {
-        var href = (a.getAttribute('href') || '').replace('/tagged/', '').toLowerCase();
-        if (href === currentTag) a.classList.add('active');
-        else if (a.getAttribute('href') === '/') a.classList.remove('active');
-      });
-    }
+        /* ── Feed / grid toggle ───────────────────────────── */
+        var toggleBtns = toggle.querySelectorAll('.view-toggle__btn');
+        function currentView() { return root.classList.contains('view-grid') ? 'grid' : 'feed'; }
+        function syncToggle() {
+            var v = currentView();
+            for (var i = 0; i < toggleBtns.length; i++) {
+                toggleBtns[i].setAttribute('aria-pressed', toggleBtns[i].getAttribute('data-view') === v ? 'true' : 'false');
+            }
+        }
+        function setView(v) {
+            if (v === currentView()) return;
+            root.classList.remove('view-feed', 'view-grid');
+            root.classList.add('view-' + v);
+            try { if (window.FYI_VIEW_KEY) localStorage.setItem(window.FYI_VIEW_KEY, v); } catch (e) {}
+            syncToggle();
+            window.scrollTo(0, 0);
+            requestAnimationFrame(maybeLoadMore);
+        }
+        toggle.addEventListener('click', function (e) {
+            var b = e.target.closest('.view-toggle__btn');
+            if (b) setView(b.getAttribute('data-view'));
+        });
 
-  })();
-  </script>
+        /* ── Lightbox ─────────────────────────────────────── */
+        var cur = -1;
+        var touchX = null, touchY = null;
+
+        function preload(i) {
+            var it = images[i];
+            if (!it) return;
+            var p = new Image();
+            if (it.srcset) { p.sizes = lbSizes(it.ratio); p.srcset = it.srcset; }
+            p.src = it.full;
+        }
+        // People first, then places, then series; only tags with a name in CONFIG.
+        function renderLbTags(tags) {
+            var box = lb.querySelector('.lb-tags');
+            box.textContent = '';
+            ['people', 'travel', 'series'].forEach(function (cat) {
+                (tags || []).map(function (t) { return find(CONFIG[cat], t); }).filter(Boolean)
+                    .sort(function (a, b) { return a.label.localeCompare(b.label, undefined, { sensitivity: 'base' }); })
+                    .forEach(function (e) {
+                        var a = el('a', 'lb-tag', e.label);
+                        a.href = tagUrl(e.tag);
+                        box.appendChild(a);
+                    });
+            });
+        }
+        function lbSizes(ratio) {
+            var w = Math.min(window.innerWidth - 140, (window.innerHeight - 150) * ratio);
+            if (window.innerWidth <= 700) w = Math.min(window.innerWidth * 0.96, (window.innerHeight - 70) * ratio);
+            return Math.max(1, Math.round(w)) + 'px';
+        }
+        function updateLightboxNav() {
+            if (lb.hidden) return;
+            lbPrev.hidden = cur <= 0;
+            lbNext.hidden = cur >= images.length - 1 && !nextUrl;
+        }
+        function show(i) {
+            var it = images[i];
+            if (!it) return;
+            cur = i;
+            lbPh.style.setProperty('--r', it.ratio);
+            lbPh.style.setProperty('--c', it.color);
+            lbPh.classList.remove('is-loaded');
+            while (lbPh.firstChild) lbPh.removeChild(lbPh.firstChild);
+            var img = el('img');
+            img.alt = it.alt || '';
+            img.onload = img.onerror = function () { if (cur === i) { fitRatio(lbPh, img); lbPh.classList.add('is-loaded'); } };
+            if (it.srcset) { img.sizes = lbSizes(it.ratio); img.srcset = it.srcset; }
+            img.src = it.full;
+            lbPh.appendChild(img);
+            renderLbTags(it.tags);
+            updateLightboxNav();
+            preload(i + 1);
+            preload(i - 1);
+            if (i >= images.length - 4) loadMore();
+        }
+        function step(d) {
+            if (cur < 0) return;
+            var n = cur + d;
+            if (n < 0) return;
+            if (n < images.length) { show(n); return; }
+            loadMore().then(function () { if (!lb.hidden && n < images.length) show(n); });
+        }
+        function openLightbox(i) {
+            lb.hidden = false;
+            root.classList.add('lb-open');
+            show(i);
+            lbClose.focus();
+        }
+        function closeLightbox() {
+            lb.hidden = true;
+            root.classList.remove('lb-open');
+            while (lbPh.firstChild) lbPh.removeChild(lbPh.firstChild);
+            var tile = grid.querySelector('.tile[data-index="' + cur + '"]');
+            if (tile) {
+                var r = tile.getBoundingClientRect();
+                if (r.bottom < 0 || r.top > window.innerHeight) tile.scrollIntoView({ block: 'center' });
+                tile.focus({ preventScroll: true });
+            }
+            cur = -1;
+        }
+
+        lbPrev.addEventListener('click', function () { step(-1); });
+        lbNext.addEventListener('click', function () { step(1); });
+        lbClose.addEventListener('click', closeLightbox);
+        lb.addEventListener('click', function (e) { if (e.target === lb || e.target.classList.contains('lb-stage') || e.target.classList.contains('lb-tags')) closeLightbox(); });
+
+        // Phones/touch: tapping the photo goes to the next one (the arrow buttons are hidden there).
+        var tapToAdvance = window.matchMedia('(max-width: 700px), (pointer: coarse)');
+        lbPh.addEventListener('click', function () { if (tapToAdvance.matches) step(1); });
+
+        document.addEventListener('keydown', function (e) {
+            if (lb.hidden) return;
+            if (e.key === 'ArrowLeft')       { e.preventDefault(); step(-1); }
+            else if (e.key === 'ArrowRight') { e.preventDefault(); step(1); }
+            else if (e.key === 'Escape')     { e.preventDefault(); closeLightbox(); }
+            else if (e.key === 'Tab') {
+                // Keep focus inside the dialog.
+                var f = Array.prototype.filter.call(lb.querySelectorAll('button'), function (b) { return !b.hidden; });
+                var idx = f.indexOf(document.activeElement);
+                e.preventDefault();
+                f[(idx + (e.shiftKey ? f.length - 1 : 1)) % f.length].focus();
+            }
+        });
+
+        lb.addEventListener('touchstart', function (e) {
+            if (e.touches.length !== 1) return;
+            touchX = e.touches[0].clientX;
+            touchY = e.touches[0].clientY;
+        }, { passive: true });
+        lb.addEventListener('touchend', function (e) {
+            if (touchX === null) return;
+            var dx = e.changedTouches[0].clientX - touchX;
+            var dy = e.changedTouches[0].clientY - touchY;
+            touchX = touchY = null;
+            if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) step(dx < 0 ? 1 : -1);
+        }, { passive: true });
+
+        /* ── Landing pages ────────────────────────────────── */
+        function renderLanding(items) {
+            items.forEach(function (item) {
+                var a = el('a', 'place');
+                a.href = tagUrl(item.tag);
+                // 3:2 until the cover loads, then the photo's own shape.
+                var ph = makePh(1.5, pastel(item.tag), item.cover, '', '', item.label);
+                a.appendChild(ph);
+                a.appendChild(el('span', 'place__label', item.label));
+                landing.appendChild(a);
+                if (item.cover) lazy(ph.firstChild);
+            });
+            landing.hidden = false;
+        }
+
+        /* ── Boot ─────────────────────────────────────────── */
+        renderPageHead();
+
+        if (isLanding) {
+            body.classList.add('is-landing');
+            landing.classList.add('landing--' + tag);
+            renderLanding(CONFIG[tag]);
+            return;
+        }
+
+        Array.prototype.slice.call(feed.querySelectorAll('.js-post')).forEach(function (a) {
+            seen[a.id] = true;
+            hydratePost(a);
+        });
+
+        if (isPermalink) {
+            root.classList.remove('view-grid');
+            root.classList.add('view-feed');
+            loader.hidden = true;
+            return;
+        }
+
+        toggle.hidden = false;
+        syncToggle();
+        if (section === 'people') renderPeoplePicker();
+
+        if (shuffleMode) {
+            loadAllThenShuffle();
+            return;
+        }
+
+        if ('IntersectionObserver' in window) {
+            new IntersectionObserver(function (entries) {
+                if (entries[0].isIntersecting) maybeLoadMore();
+            }, { rootMargin: '0px 0px 1500px 0px' }).observe(loader);
+        } else {
+            window.addEventListener('scroll', maybeLoadMore, { passive: true });
+        }
+        maybeLoadMore();
+    })();
+    </script>
 </body>
 </html>
